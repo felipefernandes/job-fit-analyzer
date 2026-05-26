@@ -539,7 +539,7 @@ export default function App() {
                 {/* Header */}
                 <div style={{ marginBottom: "1.75rem" }}>
                     <div style={{ ...mono, fontSize: "0.62rem", color: "#22d78f", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 8 }}>
-                        felipe fernandes · career intel
+                        your career intel
                     </div>
                     <h1 style={{ fontSize: "1.65rem", fontWeight: 600, letterSpacing: "-0.025em", color: "#eeeef8" }}>Job Fit Analyzer</h1>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: "0.4rem", flexWrap: "wrap" }}>
