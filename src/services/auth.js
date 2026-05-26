@@ -1,5 +1,5 @@
 import { auth } from "../firebase";
-import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "firebase/auth";
+import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, deleteUser, reauthenticateWithPopup } from "firebase/auth";
 
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: 'select_account' });
@@ -25,4 +25,23 @@ export const logout = async () => {
 
 export const subscribeToAuthChanges = (callback) => {
     return onAuthStateChanged(auth, callback);
+};
+
+export const deleteCurrentUserAccount = async () => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Nenhum usuário autenticado.");
+
+    try {
+        await deleteUser(user);
+    } catch (error) {
+        if (error.code === 'auth/requires-recent-login') {
+            const reauthProvider = new GoogleAuthProvider();
+            reauthProvider.setCustomParameters({ prompt: 'select_account' });
+            await reauthenticateWithPopup(user, reauthProvider);
+            await deleteUser(user);
+        } else {
+            console.error("Erro ao excluir conta do Firebase Auth:", error);
+            throw error;
+        }
+    }
 };

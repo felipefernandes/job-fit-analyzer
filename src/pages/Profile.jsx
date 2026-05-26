@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserProfile, saveUserProfile, saveResumeToDb, getResumeFromDb, saveLlmKey, getLlmKey, removeLlmKey } from '../services/db';
+import { getUserProfile, saveUserProfile, saveResumeToDb, getResumeFromDb, saveLlmKey, getLlmKey, removeLlmKey, deleteUserData } from '../services/db';
+import { deleteCurrentUserAccount } from '../services/auth';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -14,6 +15,12 @@ export default function Profile() {
     const [nameStatus, setNameStatus] = useState({ type: '', message: '' });
     const [resumeStatus, setResumeStatus] = useState({ type: '', message: '' });
     const [keyStatus, setKeyStatus] = useState({});
+    
+    // States para exclusão de conta
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [confirmEmailInput, setConfirmEmailInput] = useState('');
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
     
     const fileInputRef = useRef(null);
 
@@ -114,6 +121,26 @@ export default function Profile() {
         setTimeout(() => {
             showKeyStatus(provider, `Simulada como OK!`);
         }, 1000);
+    };
+
+    const handleDeleteAccount = async () => {
+        if (confirmEmailInput !== user.email) return;
+        setDeleting(true);
+        setDeleteError('');
+        try {
+            // 1. Apagar dados do Firestore primeiro
+            await deleteUserData(user.uid);
+            
+            // 2. Apagar a conta de autenticação (reautentica se necessário)
+            await deleteCurrentUserAccount();
+            
+            // 3. Limpar localStorage
+            localStorage.clear();
+        } catch (e) {
+            console.error("Erro ao excluir conta:", e);
+            setDeleteError(e.message || "Erro ao excluir conta. Tente novamente.");
+            setDeleting(false);
+        }
     };
 
     if (loading) return <div style={{ padding: "2rem" }}>Carregando perfil...</div>;
@@ -260,6 +287,68 @@ export default function Profile() {
                     </div>
                     );
                 })}
+            </div>
+
+            {/* Danger Zone */}
+            <div style={{ ...card, borderColor: "#ff4466", background: "rgba(255, 68, 102, 0.01)", marginTop: "2rem" }}>
+                <h2 style={{ fontSize: "1.2rem", marginBottom: "0.5rem", color: "#ff4466", display: "flex", alignItems: "center", gap: 8 }}>
+                    <span>⚠️</span> Danger Zone (Zona de Perigo)
+                </h2>
+                <p style={{ fontSize: "0.85rem", color: "#8888a8", marginBottom: "1.5rem", lineHeight: 1.5 }}>
+                    Exclua permanentemente sua conta e todos os dados salvos (perfil, currículo, chaves de API e histórico de análises). Esta ação é definitiva e não poderá ser revertida.
+                </p>
+
+                {!showDeleteConfirm ? (
+                    <button 
+                        onClick={() => setShowDeleteConfirm(true)}
+                        style={{ ...btnStyle, background: "transparent", border: "1px solid #ff4466", color: "#ff4466", transition: "all 0.2s" }}
+                        onMouseEnter={(e) => e.target.style.background = "rgba(255, 68, 102, 0.1)"}
+                        onMouseLeave={(e) => e.target.style.background = "transparent"}
+                    >
+                        Excluir Minha Conta e Dados
+                    </button>
+                ) : (
+                    <div style={{ padding: "1rem", background: "rgba(255, 68, 102, 0.05)", border: "1px dashed #ff4466", borderRadius: 4 }}>
+                        <p style={{ fontSize: "0.85rem", color: "#e0e0f0", marginBottom: 10 }}>
+                            Para confirmar, digite seu e-mail de cadastro (<strong style={{ color: "#ff4466" }}>{user.email}</strong>):
+                        </p>
+                        <input 
+                            style={inputStyle} 
+                            placeholder={user.email} 
+                            value={confirmEmailInput} 
+                            onChange={e => setConfirmEmailInput(e.target.value)} 
+                            disabled={deleting}
+                            autoFocus
+                        />
+                        <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                            <button 
+                                style={{ 
+                                    ...btnStyle, 
+                                    background: confirmEmailInput === user.email ? "#ff4466" : "#2d1a21", 
+                                    color: confirmEmailInput === user.email ? "#fff" : "#684852", 
+                                    cursor: confirmEmailInput === user.email ? "pointer" : "not-allowed",
+                                    border: "none"
+                                }}
+                                disabled={confirmEmailInput !== user.email || deleting}
+                                onClick={handleDeleteAccount}
+                            >
+                                {deleting ? "Excluindo..." : "Confirmar Exclusão Definitiva"}
+                            </button>
+                            <button 
+                                style={{ ...btnStyle, background: "transparent", border: "1px solid #383858", color: "#8888a8" }}
+                                onClick={() => {
+                                    setShowDeleteConfirm(false);
+                                    setConfirmEmailInput('');
+                                    setDeleteError('');
+                                }}
+                                disabled={deleting}
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                        {deleteError && <p style={{ color: "#ff4466", fontSize: "0.8rem", marginTop: 10, fontFamily: "monospace" }}>{deleteError}</p>}
+                    </div>
+                )}
             </div>
 
         </div>

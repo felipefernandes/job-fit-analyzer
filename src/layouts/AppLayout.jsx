@@ -76,6 +76,28 @@ export default function AppLayout() {
             <main style={{ flex: 1 }}>
                 <Outlet />
             </main>
+
+            <footer style={{ padding: "1.5rem 1.5rem", textAlign: "center", borderTop: "1px solid #1e1e32", color: "#686888", fontSize: "0.75rem", background: "#0b0b11" }}>
+                <p style={{ display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", alignItems: "center", margin: 0 }}>
+                    <span>Job Fit Analyzer</span>
+                    <span>·</span>
+                    <a href="https://github.com/felipefernandes/job-fit-analyzer" target="_blank" rel="noreferrer" style={{ color: "#8888a8", textDecoration: "none" }}>GitHub</a>
+                    <span>·</span>
+                    <NavLink to="/terms" style={{ color: "#8888a8", textDecoration: "none" }}>Termos de Uso</NavLink>
+                    <span>·</span>
+                    <NavLink to="/privacy" style={{ color: "#8888a8", textDecoration: "none" }}>Política de Privacidade</NavLink>
+                    <span>·</span>
+                    <button 
+                        onClick={() => {
+                            localStorage.removeItem("lgpd_consent");
+                            window.dispatchEvent(new Event("lgpd_consent_changed"));
+                        }} 
+                        style={{ background: "transparent", border: "none", color: "#8888a8", cursor: "pointer", fontSize: "0.75rem", padding: 0, textDecoration: "underline", fontFamily: "inherit" }}
+                    >
+                        Preferências de Privacidade
+                    </button>
+                </p>
+            </footer>
         </div>
     );
 }
