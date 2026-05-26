@@ -387,8 +387,8 @@ export default function App() {
                         {editingResume ? "Cole seu currículo em Markdown ou forneça um link do Google Docs." : "Cole seu currículo em texto/markdown ou forneça um link público do Google Docs. Salvo localmente."}
                     </p>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
-                            configurações ⚙️
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: (getGeminiApiKey() || getGroqApiKey()) ? "#22d78f" : "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            {(getGeminiApiKey() || getGroqApiKey()) ? "✓ chaves configuradas ⚙️" : "configurações ⚙️"}
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
                         <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
@@ -549,8 +549,8 @@ export default function App() {
                             atualizar ↗
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
-                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
-                            configurações ⚙️
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: (getGeminiApiKey() || getGroqApiKey()) ? "#22d78f" : "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            {(getGeminiApiKey() || getGroqApiKey()) ? "✓ chaves configuradas ⚙️" : "configurações ⚙️"}
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
                         <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
