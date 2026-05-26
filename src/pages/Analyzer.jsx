@@ -206,14 +206,17 @@ export default function Analyzer() {
 
     if (!resume || (!keys.gemini && !keys.groq)) {
         return (
-            <div style={{ maxWidth: 840, margin: "0 auto", padding: "2rem 1.5rem", textAlign: "center" }}>
+            <div style={{ maxWidth: 840, margin: "0 auto", padding: "2rem 1.5rem", textAlign: "center", animation: "fadeUp 0.35s ease" }}>
                 <div style={card}>
-                    <h2 style={{ color: "#ff4466", marginBottom: "1rem" }}>Perfil Incompleto</h2>
-                    <p style={{ color: "#8888a8", marginBottom: "1.5rem" }}>
-                        Você precisa salvar o seu currículo e configurar pelo menos uma chave de API (Gemini ou Groq) para realizar análises.
+                    <div style={{ fontSize: "2rem", marginBottom: "1rem" }}>👋</div>
+                    <h2 style={{ color: "#eeeef8", marginBottom: "1rem", fontSize: "1.4rem" }}>Bem-vindo ao Job Fit Analyzer!</h2>
+                    <p style={{ color: "#8888a8", marginBottom: "2rem", lineHeight: 1.6 }}>
+                        Para fazer sua primeira análise, precisamos que você forneça duas coisas essenciais:<br/>
+                        <strong>1. Seu currículo</strong> (texto ou link do Google Docs)<br/>
+                        <strong>2. Uma chave de API</strong> (Gemini ou Groq) para o motor de IA funcionar.<br/>
                     </p>
-                    <Link to="/app/profile" style={{ background: "#22d78f", color: "#0b0b11", textDecoration: "none", padding: "10px 20px", borderRadius: 4, fontWeight: 700 }}>
-                        Ir para o Perfil
+                    <Link to="/app/profile" style={{ background: "#22d78f", color: "#0b0b11", textDecoration: "none", padding: "12px 24px", borderRadius: 6, fontWeight: 700, display: "inline-block", fontFamily: "'DM Sans', sans-serif" }}>
+                        Configurar meu Perfil →
                     </Link>
                 </div>
             </div>
