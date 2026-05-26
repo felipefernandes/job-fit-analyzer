@@ -215,11 +215,18 @@ export default function Profile() {
                     Suas chaves são criptografadas localmente usando sua sessão antes de serem enviadas para o banco de dados. Nós não temos acesso a elas em texto plano.
                 </p>
 
-                {['gemini', 'groq'].map(provider => (
+                {['gemini', 'groq'].map(provider => {
+                    const providerUrls = {
+                        gemini: 'https://aistudio.google.com/app/apikey',
+                        groq: 'https://console.groq.com/keys'
+                    };
+                    
+                    return (
                     <div key={provider} style={{ marginBottom: "1.5rem", padding: "1rem", background: "#0b0b11", borderRadius: 4, border: "1px solid #1e1e32" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                             <strong style={{ textTransform: "capitalize", color: "#e0e0f0", display: "flex", alignItems: "center", gap: 10 }}>
                                 {provider} API Key
+                                <a href={providerUrls[provider]} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.75rem", color: "#8888a8", textDecoration: "underline" }} title={`Obter chave do ${provider}`}>Obter chave ↗</a>
                                 {renderStatus(keyStatus[provider])}
                             </strong>
                             {keys[provider] && (
@@ -251,7 +258,8 @@ export default function Profile() {
                             </button>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
 
         </div>
