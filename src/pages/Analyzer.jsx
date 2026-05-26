@@ -38,16 +38,39 @@ const fetchUrlContent = async (url) => {
     if (url.includes("docs.google.com/document") && docIdMatch) {
         targetUrl = `https://docs.google.com/document/d/${docIdMatch[1]}/export?format=txt`;
     }
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
-    const res = await fetch(proxyUrl);
-    if (!res.ok) throw new Error(`Falha ao acessar o link: ${res.statusText}`);
-    let text = await res.text();
+    
+    const proxies = [
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+        `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+    ];
+    
+    let text = null;
+    let lastError = "";
+    
+    for (const proxyUrl of proxies) {
+        try {
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error(res.statusText || res.status);
+            text = await res.text();
+            break; // Sucesso, sai do loop
+        } catch (e) {
+            lastError = e.message;
+        }
+    }
+    
+    if (text === null) {
+        throw new Error(`Proxies falharam ao acessar: ${lastError}`);
+    }
+
     if (text.includes("<html") || text.includes("<body")) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(text, 'text/html');
-        const toRemove = doc.querySelectorAll('script, style, nav, footer, iframe, header');
+        const toRemove = doc.querySelectorAll('script, style, nav, footer, iframe, header, noscript, svg');
         toRemove.forEach(el => el.remove());
-        text = doc.body.innerText || doc.body.textContent || "";
+        
+        // Em plataformas como Gupy, a vaga costuma ficar em main ou div com classe description
+        const mainContent = doc.querySelector('main') || doc.querySelector('[class*="description"]') || doc.body;
+        text = mainContent.innerText || mainContent.textContent || "";
         text = text.replace(/\s+/g, ' ').trim();
     }
     return text;
