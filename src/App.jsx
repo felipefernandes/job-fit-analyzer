@@ -314,7 +314,7 @@ export default function App() {
             const userContent = `CURRÍCULO DO CANDIDATO:\n${resume}\n\n---\n\n${jobSection}\n\n---\n\nAnalise o fit e retorne o JSON.`;
 
             const { text, provider } = await fetchLlm(userContent, SYSTEM_PROMPT, false);
-            
+
             console.log(`Análise concluída com sucesso via ${provider}`);
             setDebugText(text);
             setProviderUsed(provider);
@@ -358,7 +358,7 @@ export default function App() {
             `}</style>
             <div style={{ maxWidth: 720, margin: "0 auto" }}>
                 <div style={{ ...mono, fontSize: "0.62rem", color: "#22d78f", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 8 }}>
-                    felipe fernandes · career intel
+                    your career intel
                 </div>
                 <h1 style={{ fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.025em", color: "#eeeef8", marginBottom: "0.4rem" }}>
                     {editingResume ? "Atualizar currículo" : "Configurar currículo"}
