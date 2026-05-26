@@ -41,6 +41,22 @@ O que já funciona:
 
 ---
 
+## Fase 0.9 — Proteção Legal e Conformidade LGPD (Anexo)
+
+**Tema:** Segurança jurídica e conformidade regulatória
+
+**Objetivo:** Garantir conformidade com a LGPD e mitigar riscos jurídicos no MVP.
+
+**Entregas:**
+- [x] 1. Banner de consentimento de cookies e telemetria (opt-in para Google Analytics)
+- [x] 2. Páginas de Termos de Uso e Política de Privacidade acessíveis e em português
+- [x] 3. Exclusão completa de conta e todos os dados associados no Firestore e Auth (reautenticação)
+- [x] 4. Opção de gerenciar preferências de privacidade a qualquer momento
+
+**Resultado:** MVP seguro e em conformidade legal com a LGPD para lançamento público.
+
+---
+
 ## Fase 1 — Multi-Provider com Fallback
 
 **Tema:** Resiliência e flexibilidade de LLM

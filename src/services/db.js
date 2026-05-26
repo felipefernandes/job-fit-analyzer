@@ -87,3 +87,30 @@ export const deleteAnalysis = async (uid, analysisId) => {
     const docRef = doc(db, "users", uid, "analyses", analysisId);
     await deleteDoc(docRef);
 };
+
+export const deleteUserData = async (uid) => {
+    try {
+        // 1. Apagar documento do perfil
+        const profileRef = doc(db, "users", uid, "profile", "main");
+        await deleteDoc(profileRef);
+
+        // 2. Apagar documento do currículo
+        const resumeRef = doc(db, "users", uid, "resume", "main");
+        await deleteDoc(resumeRef);
+
+        // 3. Apagar chaves de API
+        const geminiKeyRef = doc(db, "users", uid, "llmKeys", "gemini");
+        await deleteDoc(geminiKeyRef);
+        const groqKeyRef = doc(db, "users", uid, "llmKeys", "groq");
+        await deleteDoc(groqKeyRef);
+
+        // 4. Apagar todo o histórico de análises
+        const analysesRef = collection(db, "users", uid, "analyses");
+        const snap = await getDocs(analysesRef);
+        const deletePromises = snap.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+    } catch (error) {
+        console.error("Erro ao apagar dados do Firestore:", error);
+        throw error;
+    }
+};

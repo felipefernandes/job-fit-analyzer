@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { loginWithGoogle } from '../services/auth';
 
@@ -196,8 +196,22 @@ export default function Landing() {
             {/* Footer */}
             <footer style={{ padding: "2rem 1.5rem", textAlign: "center", borderTop: "1px solid #1e1e32", color: "#686888", fontSize: "0.8rem" }}>
                 <p>Job Fit Analyzer · Open Source · Feito por Felipe Fernandes</p>
-                <p style={{ marginTop: "0.5rem" }}>
-                    <a href="https://github.com/felipefernandes/job-fit-analyzer" style={{ color: "#8888a8", textDecoration: "none" }}>GitHub</a>
+                <p style={{ marginTop: "0.75rem", display: "flex", justifyContent: "center", gap: "15px", flexWrap: "wrap", alignItems: "center" }}>
+                    <a href="https://github.com/felipefernandes/job-fit-analyzer" target="_blank" rel="noreferrer" style={{ color: "#8888a8", textDecoration: "none" }}>GitHub</a>
+                    <span>·</span>
+                    <Link to="/terms" style={{ color: "#8888a8", textDecoration: "none" }}>Termos de Uso</Link>
+                    <span>·</span>
+                    <Link to="/privacy" style={{ color: "#8888a8", textDecoration: "none" }}>Política de Privacidade</Link>
+                    <span>·</span>
+                    <button 
+                        onClick={() => {
+                            localStorage.removeItem("lgpd_consent");
+                            window.dispatchEvent(new Event("lgpd_consent_changed"));
+                        }} 
+                        style={{ background: "transparent", border: "none", color: "#8888a8", cursor: "pointer", fontSize: "0.8rem", padding: 0, textDecoration: "underline", fontFamily: "inherit" }}
+                    >
+                        Preferências de Privacidade
+                    </button>
                 </p>
             </footer>
         </div>

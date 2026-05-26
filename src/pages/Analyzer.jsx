@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from '../context/AuthContext';
 import { getResumeFromDb, getLlmKey, saveAnalysis } from '../services/db';
 import { Link } from 'react-router-dom';

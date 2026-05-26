@@ -202,6 +202,63 @@ Navegação interna da aplicação com itens: Nova Análise (`/app`), Histórico
 
 ---
 
+## Fase 0.9 — Proteção Legal e Conformidade LGPD (Anexo)
+
+---
+
+### [x] 0.9.1 — Consentimento de Telemetria e Cookies (LGPD)
+
+**Escopo:**
+Criar componente `ConsentBanner` para controlar cookies/telemetria. Por padrão, desativar Google Analytics. Exibir banner informando termos e políticas. Salvar escolha em `localStorage`. Ativar Analytics somente com opt-in ("Aceitar").
+
+**Critérios de aceite:**
+- Telemetria bloqueada até clique em "Aceitar"
+- Opção "Recusar" mantém a telemetria bloqueada e esconde o banner
+- Status de consentimento salvo em `localStorage` (`lgpd_consent`: `accepted` | `declined`)
+- Inicialização segura do Analytics encapsulada em `firebase.js`
+
+**Como testar:**
+- Network: verificar que não há requisições para `google-analytics.com` antes do clique
+- LocalStorage: inspecionar chave `lgpd_consent` após ações
+- Manual: clicar em Recusar -> verificar que não carrega telemetria
+
+---
+
+### [x] 0.9.2 — Termos de Uso e Política de Privacidade
+
+**Escopo:**
+Criar páginas `/terms` e `/privacy` contendo os textos jurídicos do Job Fit Analyzer com o e-mail do autor (`felipefernandesweb@gmail.com`). Adicionar links e gerenciamento de preferências no rodapé da Landing e do AppLayout.
+
+**Critérios de aceite:**
+- Rotas públicas `/terms` e `/privacy` acessíveis
+- Design escuro condizente com a tipografia do app
+- Rodapés contêm links para os documentos e botão "Preferências de Privacidade" para resetar o consentimento
+
+**Como testar:**
+- Manual: navegar deslogado e logado até as páginas legais
+- Manual: clicar em "Preferências de Privacidade" no rodapé -> banner deve reaparecer
+
+---
+
+### [x] 0.9.3 — Exclusão Completa de Conta e Dados
+
+**Escopo:**
+Implementar botão "Excluir Conta" na página `/app/profile`. O fluxo deve: (1) excluir recursivamente todos os dados do usuário no Firestore (perfil, currículo, keys e análises) e (2) excluir a conta no Firebase Auth. Se necessário, reautenticar com Google Sign-In via popup para evitar erros.
+
+**Critérios de aceite:**
+- Botão visível na seção "Zona de Perigo" com borda/texto vermelho
+- Modal ou prompt exigindo confirmação digitada ("EXCLUIR")
+- Ordem rigorosa: deleta dados no Firestore primeiro e conta no Auth depois
+- Trata erro `auth/requires-recent-login` reautenticando com Google sem deslogar
+- Após deleção, limpa localStorage e retorna à Landing Page
+
+**Como testar:**
+- Manual: criar conta de teste, gerar dados, ir em perfil e clicar em excluir
+- Banco de dados: verificar que a coleção e documentos do UID sumiram por completo
+- Auth: verificar que a conta foi removida do Firebase Authentication
+
+---
+
 ## Fase 1 — Multi-Provider com Fallback
 
 ---

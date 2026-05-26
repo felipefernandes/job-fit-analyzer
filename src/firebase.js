@@ -21,14 +21,26 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Safe initialization of Analytics (handles SSR / adblockers / unsupported environments)
+// Safe initialization of Analytics (handles SSR / adblockers / unsupported environments and LGPD consent)
 let analytics = null;
-isSupported().then((supported) => {
-  if (supported) {
-    analytics = getAnalytics(app);
+
+export const initializeAnalyticsSafe = async () => {
+  const consent = localStorage.getItem("lgpd_consent");
+  if (consent !== "accepted") {
+    return null;
   }
-}).catch((err) => {
-  console.warn("Firebase Analytics is not supported in this environment:", err);
-});
+  try {
+    const supported = await isSupported();
+    if (supported && !analytics) {
+      analytics = getAnalytics(app);
+    }
+  } catch (err) {
+    console.warn("Firebase Analytics is not supported in this environment:", err);
+  }
+  return analytics;
+};
+
+// Try to initialize automatically on startup if consent was previously granted
+initializeAnalyticsSafe();
 
 export { app, analytics, auth, db };
