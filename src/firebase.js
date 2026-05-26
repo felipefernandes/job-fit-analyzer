@@ -1,5 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -15,6 +17,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Initialize Auth & Firestore
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 // Safe initialization of Analytics (handles SSR / adblockers / unsupported environments)
 let analytics = null;
 isSupported().then((supported) => {
@@ -25,4 +31,4 @@ isSupported().then((supported) => {
   console.warn("Firebase Analytics is not supported in this environment:", err);
 });
 
-export { app, analytics };
+export { app, analytics, auth, db };

@@ -15,21 +15,17 @@ Na pasta raiz do projeto, instale os pacotes npm necessários:
 npm install
 ```
 
-### Passo 2: Configurar as chaves de API
-Crie um arquivo `.env` na raiz do projeto (ele já está configurado no `.gitignore` para sua segurança) e insira suas credenciais:
-```env
-VITE_GEMINI_API_KEY = "sua_chave_do_google_ai_studio"
-VITE_GROQ_API_KEY = "sua_chave_do_groq"
-```
-
-### Passo 3: Executar em ambiente de desenvolvimento
+### Passo 2: Executar em ambiente de desenvolvimento
 Inicie o servidor local com hot-reload automático:
 ```bash
 npm run dev
 ```
 O projeto estará disponível no navegador através do endereço [http://localhost:5173/](http://localhost:5173/).
 
-### Passo 4: Build de Produção
+> [!NOTE]
+> **Configuração das Chaves de API**: Como as chaves de API do Gemini e Groq não são salvas no arquivo `.env` para evitar exposição em ambientes de deploy, você deve configurá-las diretamente na interface do usuário (através do ícone de configurações ⚙️). Elas serão mantidas de forma segura apenas no `localStorage` do seu próprio navegador.
+
+### Passo 3: Build de Produção
 Para compilar a aplicação otimizada para produção:
 ```bash
 npm run build
