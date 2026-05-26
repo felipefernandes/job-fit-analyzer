@@ -40,6 +40,7 @@ const fetchUrlContent = async (url) => {
     }
     
     const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
         `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
         `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
     ];
@@ -59,7 +60,7 @@ const fetchUrlContent = async (url) => {
     }
     
     if (text === null) {
-        throw new Error(`Proxies falharam ao acessar: ${lastError}`);
+        throw new Error(`Este site bloqueia acessos automatizados (Erro: ${lastError}). Por favor, copie o texto da vaga e use a aba "Colar texto".`);
     }
 
     if (text.includes("<html") || text.includes("<body")) {
