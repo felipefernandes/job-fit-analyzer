@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { analytics } from "./firebase";
+import { logEvent } from "firebase/analytics";
 
 // ─── Analysis stages ───────────────────────────────────────────────────────
 const STAGES_URL = ["Buscando a vaga na web...", "Lendo requisitos...", "Cruzando com seu perfil...", "Calculando score..."];
@@ -31,6 +33,17 @@ function ImpactoTag({ impacto }) {
     const c = impacto === "critico" ? "#ff4757" : impacto === "moderado" ? "#ffb347" : "#4fc3f7";
     return <span style={{ fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#0b0b11", background: c, padding: "2px 5px", borderRadius: 3, flexShrink: 0, marginRight: 8 }}>{impacto}</span>;
 }
+
+// ─── Analytics helper ────────────────────────────────────────────────────────
+const trackEvent = (eventName, params) => {
+    if (analytics) {
+        try {
+            logEvent(analytics, eventName, params);
+        } catch (err) {
+            console.error("Failed to log event:", err);
+        }
+    }
+};
 
 // ─── Storage helpers ─────────────────────────────────────────────────────────
 async function saveResume(text) {
@@ -248,6 +261,7 @@ export default function App() {
         setImporting(true);
         setImportError(null);
         setImportStage(0);
+        trackEvent("gdocs_import_started");
 
         try {
             // 1. Raspagem do documento do Google Docs no cliente
@@ -278,12 +292,14 @@ export default function App() {
                 setResumeDraft(cleanedText);
                 setView("analyze");
                 setEditingResume(false);
+                trackEvent("gdocs_import_completed", { provider });
             } else {
                 throw new Error("Erro ao salvar o currículo importado localmente.");
             }
         } catch (err) {
             setImportError(err.message || "Erro inesperado ao importar o documento.");
             console.error(err);
+            trackEvent("gdocs_import_failed", { error: err.message || "unknown" });
         } finally {
             setImporting(false);
         }
@@ -306,7 +322,12 @@ export default function App() {
     const handleSaveResume = async () => {
         if (!resumeDraft.trim()) return;
         const ok = await saveResume(resumeDraft.trim());
-        if (ok) { setResume(resumeDraft.trim()); setView("analyze"); setEditingResume(false); }
+        if (ok) {
+            setResume(resumeDraft.trim());
+            setView("analyze");
+            setEditingResume(false);
+            trackEvent("resume_saved_manual", { size: resumeDraft.length });
+        }
         else { alert("Erro ao salvar. Tente novamente."); }
     };
 
@@ -315,6 +336,7 @@ export default function App() {
     const analyze = async () => {
         if (!canAnalyze || loading) return;
         setLoading(true); setResult(null); setError(null); setDebugText(""); setStage(0);
+        trackEvent("analysis_started", { mode });
 
         try {
             let extractedJd = jdText;
@@ -342,9 +364,11 @@ export default function App() {
             if (!jsonMatch) throw new Error(`A API não retornou um JSON válido. Resposta recebida:\n\n"${text.slice(0, 300)}..."`);
             const parsed = JSON.parse(jsonMatch[0]);
             setResult(parsed);
+            trackEvent("analysis_completed", { score: parsed.score, provider });
         } catch (err) {
             setError(err instanceof SyntaxError ? "JSON malformado na resposta. Tente novamente." : (err.message || "Erro inesperado."));
             console.error(err);
+            trackEvent("analysis_failed", { error: err.message || "unknown" });
         } finally { setLoading(false); }
     };
 
@@ -387,8 +411,8 @@ export default function App() {
                         {editingResume ? "Cole seu currículo em Markdown ou forneça um link do Google Docs." : "Cole seu currículo em texto/markdown ou forneça um link público do Google Docs. Salvo localmente."}
                     </p>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
-                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
-                            configurações ⚙️
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: (getGeminiApiKey() || getGroqApiKey()) ? "#22d78f" : "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            {(getGeminiApiKey() || getGroqApiKey()) ? "✓ chaves configuradas ⚙️" : "configurações ⚙️"}
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
                         <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
@@ -539,7 +563,7 @@ export default function App() {
                 {/* Header */}
                 <div style={{ marginBottom: "1.75rem" }}>
                     <div style={{ ...mono, fontSize: "0.62rem", color: "#22d78f", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 8 }}>
-                        felipe fernandes · career intel
+                        your career intel
                     </div>
                     <h1 style={{ fontSize: "1.65rem", fontWeight: 600, letterSpacing: "-0.025em", color: "#eeeef8" }}>Job Fit Analyzer</h1>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: "0.4rem", flexWrap: "wrap" }}>
@@ -549,8 +573,8 @@ export default function App() {
                             atualizar ↗
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
-                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
-                            configurações ⚙️
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: (getGeminiApiKey() || getGroqApiKey()) ? "#22d78f" : "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            {(getGeminiApiKey() || getGroqApiKey()) ? "✓ chaves configuradas ⚙️" : "configurações ⚙️"}
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
                         <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
