@@ -56,9 +56,17 @@ async function loadResume() {
 }
 
 // ─── API Integrations ────────────────────────────────────────────────────────
+const getGeminiApiKey = () => {
+    return localStorage.getItem("gemini_api_key") || import.meta.env.VITE_GEMINI_API_KEY || "";
+};
+
+const getGroqApiKey = () => {
+    return localStorage.getItem("groq_api_key") || import.meta.env.VITE_GROQ_API_KEY || "";
+};
+
 const callGemini = async (userContent, systemPrompt, isUrlMode) => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (!apiKey) throw new Error("Chave VITE_GEMINI_API_KEY não encontrada no arquivo .env");
+    const apiKey = getGeminiApiKey();
+    if (!apiKey) throw new Error("Chave do Gemini não configurada. Adicione sua chave nas configurações (ícone ⚙️).");
 
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
@@ -99,8 +107,8 @@ const callGemini = async (userContent, systemPrompt, isUrlMode) => {
 };
 
 const callGroq = async (userContent, systemPrompt) => {
-    const apiKey = import.meta.env.VITE_GROQ_API_KEY;
-    if (!apiKey) throw new Error("Chave VITE_GROQ_API_KEY não encontrada no arquivo .env");
+    const apiKey = getGroqApiKey();
+    if (!apiKey) throw new Error("Chave do Groq não configurada. Adicione sua chave nas configurações (ícone ⚙️).");
 
     const endpoint = "https://api.groq.com/openai/v1/chat/completions";
 
@@ -208,6 +216,17 @@ export default function App() {
     const [importing, setImporting] = useState(false);
     const [importError, setImportError] = useState(null);
     const [importStage, setImportStage] = useState(0);
+
+    // LLM API Key Settings states
+    const [showSettings, setShowSettings] = useState(false);
+    const [geminiKeyInput, setGeminiKeyInput] = useState(localStorage.getItem("gemini_api_key") || "");
+    const [groqKeyInput, setGroqKeyInput] = useState(localStorage.getItem("groq_api_key") || "");
+
+    const handleSaveSettings = () => {
+        localStorage.setItem("gemini_api_key", geminiKeyInput.trim());
+        localStorage.setItem("groq_api_key", groqKeyInput.trim());
+        setShowSettings(false);
+    };
 
     const IMPORT_STAGES = [
         "Acessando o Google Docs...",
@@ -367,7 +386,13 @@ export default function App() {
                     <p style={{ fontSize: "0.8rem", color: "#383858" }}>
                         {editingResume ? "Cole seu currículo em Markdown ou forneça um link do Google Docs." : "Cole seu currículo em texto/markdown ou forneça um link público do Google Docs. Salvo localmente."}
                     </p>
-                    <span style={{ fontSize: "0.72rem", color: "#484868", ...mono, flexShrink: 0 }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            configurações ⚙️
+                        </button>
+                        <span style={{ color: "#1e1e32" }}>·</span>
+                        <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
+                    </div>
                 </div>
 
                 {/* Alternador de abas */}
@@ -524,6 +549,10 @@ export default function App() {
                             atualizar ↗
                         </button>
                         <span style={{ color: "#1e1e32" }}>·</span>
+                        <button onClick={() => setShowSettings(true)} style={{ background: "none", border: "none", color: "#383858", fontSize: "0.72rem", cursor: "pointer", ...mono, letterSpacing: "0.05em", padding: 0 }}>
+                            configurações ⚙️
+                        </button>
+                        <span style={{ color: "#1e1e32" }}>·</span>
                         <span style={{ fontSize: "0.72rem", color: "#484868", ...mono }}>ia: {MUTE_GEMINI ? "groq (llama 3.3)" : "gemini 2.5"}</span>
                     </div>
                 </div>
@@ -676,6 +705,59 @@ export default function App() {
                     </div>
                 )}
             </div>
+
+            {/* Configurações Modal */}
+            {showSettings && (
+                <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(11, 11, 17, 0.85)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}>
+                    <div style={{ ...card, maxWidth: 500, width: "100%", animation: "fadeUp 0.25s ease" }}>
+                        <div style={{ ...mono, fontSize: "0.62rem", color: "#22d78f", letterSpacing: "0.28em", textTransform: "uppercase", marginBottom: 8 }}>
+                            configurações
+                        </div>
+                        <h2 style={{ fontSize: "1.25rem", fontWeight: 600, color: "#eeeef8", marginBottom: "1rem" }}>Chaves de API (LLM)</h2>
+                        
+                        <p style={{ fontSize: "0.78rem", color: "#686888", marginBottom: "1.25rem", lineHeight: 1.5 }}>
+                            Para usar o analisador publicamente de forma segura, insira suas chaves de API abaixo. Elas serão salvas localmente apenas no seu navegador (<code style={{color: "#4fc3f7"}}>localStorage</code>) e nunca serão compartilhadas.
+                        </p>
+
+                        <div style={{ marginBottom: "1rem" }}>
+                            <label style={{ ...label, color: "#8888a8", display: "block", marginBottom: 6 }}>Chave Gemini API (Google)</label>
+                            <input
+                                type="password"
+                                placeholder={import.meta.env.VITE_GEMINI_API_KEY ? "Chave padrão configurada no sistema" : "Cole sua API key do Gemini..."}
+                                value={geminiKeyInput}
+                                onChange={e => setGeminiKeyInput(e.target.value)}
+                                style={{ width: "100%", background: "#0b0b11", border: "1px solid #1e1e32", borderRadius: 6, padding: "10px 12px", color: "#ddddf5", fontSize: "0.8rem", outline: "none", fontFamily: "'JetBrains Mono', monospace" }}
+                            />
+                            <div style={{ fontSize: "0.65rem", color: "#484868", marginTop: 4 }}>
+                                Obtenha em: <a href="https://aistudio.google.com/" target="_blank" rel="noreferrer" style={{ color: "#22d78f", textDecoration: "none" }}>Google AI Studio</a>
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: "1.5rem" }}>
+                            <label style={{ ...label, color: "#8888a8", display: "block", marginBottom: 6 }}>Chave Groq API (Llama Fallback)</label>
+                            <input
+                                type="password"
+                                placeholder={import.meta.env.VITE_GROQ_API_KEY ? "Chave padrão configurada no sistema" : "Cole sua API key da Groq..."}
+                                value={groqKeyInput}
+                                onChange={e => setGroqKeyInput(e.target.value)}
+                                style={{ width: "100%", background: "#0b0b11", border: "1px solid #1e1e32", borderRadius: 6, padding: "10px 12px", color: "#ddddf5", fontSize: "0.8rem", outline: "none", fontFamily: "'JetBrains Mono', monospace" }}
+                            />
+                            <div style={{ fontSize: "0.65rem", color: "#484868", marginTop: 4 }}>
+                                Obtenha em: <a href="https://console.groq.com/" target="_blank" rel="noreferrer" style={{ color: "#22d78f", textDecoration: "none" }}>Groq Console</a>
+                            </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+                            <button onClick={() => setShowSettings(false)} style={{ background: "transparent", border: "1px solid #1e1e32", color: "#484868", borderRadius: 6, padding: "8px 20px", cursor: "pointer", fontSize: "0.76rem", ...mono, letterSpacing: "0.05em" }}>
+                                cancelar
+                            </button>
+                            <button onClick={handleSaveSettings} style={{ background: "#22d78f", color: "#0b0b11", border: "none", borderRadius: 6, padding: "8px 24px", cursor: "pointer", fontSize: "0.76rem", fontWeight: 700, fontFamily: "'DM Sans',sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                                salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
