@@ -12,7 +12,7 @@
 
 ---
 
-### [ ] 0.1 — Firebase Auth: Google Sign-In
+### [x] 0.1 — Firebase Auth: Google Sign-In
 
 **Escopo:**
 Configurar Firebase Authentication com provider Google. Criar hook/service reutilizável que expõe: login, logout, user state, loading state. Nenhuma UI neste item — apenas a infraestrutura.
@@ -32,7 +32,7 @@ Configurar Firebase Authentication com provider Google. Criar hook/service reuti
 
 ---
 
-### [ ] 0.2 — Landing Page: Estrutura e Conteúdo
+### [x] 0.2 — Landing Page: Estrutura e Conteúdo
 
 **Escopo:**
 Implementar a landing page conforme spec do LANDING.md. Seções: Hero, Como Funciona, O Que Você Recebe, Transparência, CTA Final + Login, Footer. Sem funcionalidade de login ainda — o botão de CTA final será conectado na task 0.3.
@@ -55,7 +55,7 @@ Implementar a landing page conforme spec do LANDING.md. Seções: Hero, Como Fun
 
 ---
 
-### [ ] 0.3 — Landing: Integração do CTA com Firebase Auth
+### [x] 0.3 — Landing: Integração do CTA com Firebase Auth
 
 **Escopo:**
 Conectar os botões de CTA da landing ("Experimente Agora" e "Entrar com Google") ao Firebase Auth (task 0.1). Após login bem-sucedido, redirecionar para `/app`. Se já logado e acessar `/`, redirecionar para `/app`.
@@ -77,7 +77,7 @@ Conectar os botões de CTA da landing ("Experimente Agora" e "Entrar com Google"
 
 ---
 
-### [ ] 0.4 — Firestore: Modelo de Dados do Usuário
+### [x] 0.4 — Firestore: Modelo de Dados do Usuário
 
 **Escopo:**
 Criar a estrutura de documentos no Firestore para o perfil do usuário. Collection `users/{uid}` com subcollections. Criar service/hook para CRUD. Implementar security rules do Firestore (cada user só acessa seus dados).
@@ -116,7 +116,7 @@ users/{uid}
 
 ---
 
-### [ ] 0.5 — Interface: Perfil do Usuário
+### [x] 0.5 — Interface: Perfil do Usuário
 
 **Escopo:**
 Tela `/app/profile` com: nome de exibição (editável), currículo salvo (textarea MD ou campo de URL do Google Docs), gerenciamento de API keys (adicionar, remover, testar conexão por provider). Usa os services da task 0.4.
@@ -142,7 +142,7 @@ Tela `/app/profile` com: nome de exibição (editável), currículo salvo (texta
 
 ---
 
-### [ ] 0.6 — Integrar MVP ao Fluxo Autenticado
+### [x] 0.6 — Integrar MVP ao Fluxo Autenticado
 
 **Escopo:**
 Mover a mecânica principal do MVP (input de vaga + análise + score) para dentro do fluxo autenticado em `/app`. Carregar currículo e API key automaticamente do perfil do Firestore (sem pedir novamente). Manter a opção de informar manualmente caso o perfil esteja incompleto.
@@ -164,7 +164,7 @@ Mover a mecânica principal do MVP (input de vaga + análise + score) para dentr
 
 ---
 
-### [ ] 0.7 — Interface: Histórico de Avaliações
+### [x] 0.7 — Interface: Histórico de Avaliações
 
 **Escopo:**
 Tela `/app/history` com lista de avaliações salvas. Cada item exibe: título da vaga, empresa, score (com cor), data. Ao clicar, expande ou abre detalhe com fit points, gap points, e recomendação.
@@ -183,7 +183,7 @@ Tela `/app/history` com lista de avaliações salvas. Cada item exibe: título d
 
 ---
 
-### [ ] 0.8 — Menu de Navegação do App
+### [x] 0.8 — Menu de Navegação do App
 
 **Escopo:**
 Navegação interna da aplicação com itens: Nova Análise (`/app`), Histórico (`/app/history`), Perfil (`/app/profile`). Indicar item ativo. Exibir nome e foto do usuário com opção de logout.

@@ -28,13 +28,14 @@ O que já funciona:
 **Objetivo:** O produto deixa de ser uma ferramenta anônima e vira uma aplicação com usuário, landing pública, e dados persistidos.
 
 **Entregas:**
-- [ ] 1. Landing page com identidade visual definida e CTA para login
-- [ ] 2. Firebase Auth com Google Sign-In
-- [ ] 3. Firestore: persistência do currículo do usuário (não precisa reenviar a cada uso)
-- [ ] 4. Firestore: persistência das API keys do usuário (criptografadas client-side)
-- [ ] 5. Firestore: histórico de avaliações (título da vaga, empresa, score, fit, gaps, data)
-- [ ] 6. Interface de perfil do usuário (nome, currículo salvo, keys configuradas)
-- [ ] 7. Interface de histórico de avaliações (lista com score, filtro básico)
+- [x] 1. Landing page com identidade visual definida e CTA para login
+- [x] 2. Firebase Auth com Google Sign-In
+- [x] 3. Firestore: persistência do currículo do usuário (não precisa reenviar a cada uso)
+- [x] 4. Firestore: persistência das API keys do usuário (criptografadas client-side)
+- [x] 5. Firestore: histórico de avaliações (título da vaga, empresa, score, fit, gaps, data)
+- [x] 6. Interface de perfil do usuário (nome, currículo salvo, keys configuradas)
+- [x] 7. Interface de histórico de avaliações (lista com score, filtro básico)
+- [x] 8. Guardrails e segurança do system prompt
 
 **Resultado:** Usuário faz login, configura uma vez, e tem histórico. Produto é reutilizável.
 
