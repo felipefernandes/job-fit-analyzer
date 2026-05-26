@@ -1,5 +1,5 @@
 import { db } from "../firebase";
-import { doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc } from "firebase/firestore";
 import { encryptText, decryptText } from "./crypto";
 
 export const getUserProfile = async (uid) => {
@@ -81,4 +81,9 @@ export const getAnalysesHistory = async (uid) => {
     const q = query(analysesRef, orderBy("createdAt", "desc"));
     const snap = await getDocs(q);
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+};
+
+export const deleteAnalysis = async (uid, analysisId) => {
+    const docRef = doc(db, "users", uid, "analyses", analysisId);
+    await deleteDoc(docRef);
 };

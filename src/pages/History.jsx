@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getAnalysesHistory } from '../services/db';
+import { getAnalysesHistory, deleteAnalysis } from '../services/db';
 
 export default function History() {
     const { user } = useAuth();
@@ -22,6 +22,18 @@ export default function History() {
         };
         loadHistory();
     }, [user]);
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Tem certeza que deseja excluir esta avaliação do histórico?")) return;
+        
+        try {
+            await deleteAnalysis(user.uid, id);
+            setHistory(prev => prev.filter(item => item.id !== id));
+        } catch (e) {
+            console.error("Erro ao deletar análise", e);
+            alert("Não foi possível excluir a avaliação.");
+        }
+    };
 
     const toggleExpand = (id) => {
         setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -92,9 +104,21 @@ export default function History() {
                                         </div>
                                     </div>
 
-                                    <div style={{ background: "#0b0b11", padding: "1rem", borderRadius: 4, borderLeft: `3px solid ${scoreColor(item.score)}` }}>
+                                    <div style={{ background: "#0b0b11", padding: "1rem", borderRadius: 4, borderLeft: `3px solid ${scoreColor(item.score)}`, marginBottom: "1.5rem" }}>
                                         <div style={{ fontSize: "0.75rem", textTransform: "uppercase", color: scoreColor(item.score), marginBottom: 5, fontFamily: "'JetBrains Mono', monospace" }}>Recomendação</div>
                                         <div style={{ fontSize: "0.85rem", color: "#c0c0de", lineHeight: 1.5 }}>{item.recomendacao}</div>
+                                    </div>
+                                    
+                                    <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                                        <button 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleDelete(item.id);
+                                            }}
+                                            style={{ background: "transparent", border: "1px solid #ff4757", color: "#ff4757", padding: "6px 12px", borderRadius: 4, cursor: "pointer", fontSize: "0.8rem", display: "flex", alignItems: "center", gap: 5 }}
+                                        >
+                                            🗑 Excluir Avaliação
+                                        </button>
                                     </div>
 
                                 </div>
