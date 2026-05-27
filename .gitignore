@@ -27,3 +27,6 @@ dist-ssr
 .env.*
 .firebase
 
+node_modules
+.vite
+

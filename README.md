@@ -71,3 +71,9 @@ O Job Fit Analyzer opera sob uma estrutura resiliente de duas camadas para reali
 * **[src/index.css](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/index.css)**: Estilos globais e reset de compatibilidade para garantir que o tema escuro original (#0b0b11) e fontes personalizadas do Google Fonts (`DM Sans` e `JetBrains Mono`) renderizem de forma limpa.
 * **[index.html](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/index.html)**: Arquivo base que define o ponto de montagem do React (`#root`).
 * **[vite.config.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/vite.config.js)**: Configurações do Vite e plugins de compilação React.
+
+---
+
+## 🤝 Contribuição
+
+Este projeto é open-source e está aberto a contribuições da comunidade! Se você deseja colaborar com melhorias, novos recursos ou correção de problemas, por favor leia o nosso **[Guia de Contribuição](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/CONTRIBUTING.md)** para saber como configurar seu ambiente de testes e submeter suas alterações via Pull Request.
