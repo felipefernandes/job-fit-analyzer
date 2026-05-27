@@ -167,7 +167,7 @@ O que já funciona:
 Itens que só entram se houver tração ou interesse pessoal:
 
 - [ ] - Pipeline multi-agente com LangGraph (extrator de vaga → analisador de CV → pesquisador de empresa → scorer → coach)
-- [ ] - Suporte a mais formatos de CV (PDF, DOCX)
+- [x] - Suporte a mais formatos de CV (PDF, DOCX, ODT)
 - [ ] - Sugestão de reescrita do CV para a vaga específica
 - [ ] - Comparativo lado a lado de múltiplas vagas
 - [ ] - Internacionalização (i18n — inglês + português)
