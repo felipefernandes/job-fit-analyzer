@@ -259,6 +259,26 @@ Implementar botão "Excluir Conta" na página `/app/profile`. O fluxo deve: (1) 
 
 ---
 
+### [x] 0.9.4 — Upload de Currículos (PDF, DOCX, ODT)
+
+**Escopo:**
+Adicionar suporte a upload e extração de texto client-side de arquivos PDF, DOCX e ODT na página de perfil. Toda extração deve ocorrer localmente no navegador do usuário para garantir privacidade e conformidade com a LGPD.
+
+**Critérios de aceite:**
+- Aceita arquivos `.pdf`, `.docx`, `.odt`, `.md` e `.txt` com limite de tamanho de 5MB
+- Extrai o texto brutamente e preenche automaticamente o editor de texto Markdown do currículo
+- Implementa reconstrução espacial das linhas para PDFs (agrupamento e ordenação por coordenadas Y/X) para manter a estrutura correta do currículo
+- Exibe animação de scanline cyber-terminal durante a extração local
+- Desabilita novas importações e o campo de texto enquanto o processamento estiver ativo
+
+**Como testar:**
+- Manual: fazer upload de currículos válidos nos formatos PDF, DOCX e ODT e conferir a extração no editor
+- Limites: tentar subir um arquivo com mais de 5MB e conferir a mensagem de erro
+- Limites: tentar subir um arquivo `.doc` legado e verificar o bloqueio amigável informando os formatos suportados
+- UI: validar que a animação e o estado desativado aparecem corretamente
+
+---
+
 ## Fase 1 — Multi-Provider com Fallback
 
 ---

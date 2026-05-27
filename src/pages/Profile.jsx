@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUserProfile, saveUserProfile, saveResumeToDb, getResumeFromDb, saveLlmKey, getLlmKey, removeLlmKey, deleteUserData } from '../services/db';
 import { deleteCurrentUserAccount } from '../services/auth';
+import { parseResumeFile } from '../services/fileParser';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -81,14 +82,27 @@ export default function Profile() {
         }
     };
 
-    const handleFileUpload = (e) => {
+    const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            setResume({ ...resume, content: evt.target.result, source: 'markdown' });
-        };
-        reader.readAsText(file);
+
+        const maxSizeBytes = 5 * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+            showStatus(setResumeStatus, 'O arquivo excede o limite máximo de 5MB.', 'error', 5000);
+            return;
+        }
+
+        showStatus(setResumeStatus, `Extraindo texto de ${file.name}...`, 'loading', 0);
+        try {
+            const text = await parseResumeFile(file);
+            setResume({ ...resume, content: text, source: 'markdown' });
+            showStatus(setResumeStatus, 'Texto extraído com sucesso! Lembre-se de salvar.');
+        } catch (err) {
+            console.error("Erro na extração do arquivo:", err);
+            showStatus(setResumeStatus, err.message || 'Erro ao processar o arquivo.', 'error', 6000);
+        } finally {
+            if (e.target) e.target.value = '';
+        }
     };
 
     const handleSaveKey = async (provider, plainKey) => {
@@ -200,20 +214,29 @@ export default function Profile() {
                 {resume.source === 'markdown' ? (
                     <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                            <p style={{ fontSize: "0.8rem", color: "#8888a8", margin: 0 }}>Cole o conteúdo ou importe um arquivo .md / .txt</p>
+                            <p style={{ fontSize: "0.8rem", color: "#8888a8", margin: 0 }}>Cole o conteúdo ou importe um arquivo .pdf, .docx, .odt, .md ou .txt</p>
                             <button 
                                 onClick={() => fileInputRef.current?.click()}
-                                style={{ background: "transparent", border: "1px dashed #383858", color: "#00d4ff", borderRadius: 4, padding: "4px 12px", fontSize: "0.75rem", cursor: "pointer" }}
+                                disabled={resumeStatus.type === 'loading'}
+                                style={{ background: "transparent", border: "1px dashed #383858", color: resumeStatus.type === 'loading' ? '#484868' : '#00d4ff', borderRadius: 4, padding: "4px 12px", fontSize: "0.75rem", cursor: resumeStatus.type === 'loading' ? 'wait' : 'pointer' }}
                             >
-                                📤 Importar Arquivo
+                                {resumeStatus.type === 'loading' && resumeStatus.message.includes('Extraindo') ? '⏳ Processando...' : '📤 Importar Arquivo'}
                             </button>
-                            <input type="file" accept=".md,.txt" style={{ display: "none" }} ref={fileInputRef} onChange={handleFileUpload} />
+                            <input type="file" accept=".pdf,.docx,.odt,.md,.txt" style={{ display: "none" }} ref={fileInputRef} onChange={handleFileUpload} disabled={resumeStatus.type === 'loading'} />
                         </div>
+
+                        {resumeStatus.type === 'loading' && resumeStatus.message.includes('Extraindo') && (
+                            <div className="terminal-scanner">
+                                <span className="blink">$_</span> {resumeStatus.message}
+                            </div>
+                        )}
+
                         <textarea 
                             style={{ ...inputStyle, minHeight: 200, fontFamily: "monospace", fontSize: "0.8rem", resize: "vertical" }} 
                             placeholder="# Seu Nome&#10;Experiência..."
                             value={resume.content}
                             onChange={e => setResume({...resume, content: e.target.value})}
+                            disabled={resumeStatus.type === 'loading'}
                         />
                     </div>
                 ) : (
