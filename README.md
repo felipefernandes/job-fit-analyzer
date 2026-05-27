@@ -39,7 +39,7 @@ npm run build
 A aplicação possui três estados de renderização principais controlados pela variável de estado `view`:
 * **`loading`**: Exibido enquanto o currículo salvo está sendo recuperado do armazenamento local.
 * **`setup`**: Tela inicial de onboarding (FTUE) e edição de currículo onde o usuário pode optar por:
-  - **Colar texto/markdown** diretamente na caixa de entrada.
+  - **Colar texto/markdown** diretamente na caixa de entrada ou **importar arquivos locais** (.pdf, .docx, .odt, .txt, .md) extraídos de forma segura 100% no navegador (client-side).
   - **Fornecer um link de Google Docs Público**, importando-o e convertendo-o de forma automática.
 * **`analyze`**: Painel principal onde o usuário fornece os dados da vaga e visualiza os relatórios de fit.
 
@@ -68,7 +68,8 @@ O Job Fit Analyzer opera sob uma estrutura resiliente de duas camadas para reali
 ## 📂 Estrutura de Módulos Principal
 
 * **[src/App.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/App.jsx)**: Componente único central que contém toda a lógica de negócio, chamadas REST para Gemini e Groq, orquestração de falhas, tratamento de erros, estados do onboarding flexível e renderização da interface adaptativa.
-* **[src/index.css](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/index.css)**: Estilos globais e reset de compatibilidade para garantir que o tema escuro original (#0b0b11) e fontes personalizadas do Google Fonts (`DM Sans` e `JetBrains Mono`) renderizem de forma limpa.
+* **[src/services/fileParser.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/fileParser.js)**: Serviço de conversão e extração de texto para múltiplos formatos de currículo (.pdf, .docx, .odt, .md, .txt) executado client-side, incluindo algoritmo de reconstrução de linhas baseada em coordenadas Y/X para PDFs.
+* **[src/index.css](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/index.css)**: Estilos globais, resets de compatibilidade, fontes personalizadas do Google Fonts (`DM Sans` e `JetBrains Mono`) e animações cyber-terminal (scanlines e blinks).
 * **[index.html](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/index.html)**: Arquivo base que define o ponto de montagem do React (`#root`).
 * **[vite.config.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/vite.config.js)**: Configurações do Vite e plugins de compilação React.
 
