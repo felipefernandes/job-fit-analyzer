@@ -76,4 +76,4 @@ O Job Fit Analyzer opera sob uma estrutura resiliente de duas camadas para reali
 
 ## 🤝 Contribuição
 
-Este projeto é open-source e está aberto a contribuições da comunidade! Se você deseja colaborar com melhorias, novos recursos ou correção de problemas, por favor leia o nosso **[Guia de Contribuição](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/CONTRIBUTING.md)** para saber como configurar seu ambiente de testes e submeter suas alterações via Pull Request.
+Este projeto é open-source e está aberto a contribuições da comunidade! Se você deseja colaborar com melhorias, novos recursos ou correção de problemas, por favor leia o nosso **[Guia de Contribuição](./CONTRIBUTING.md)** para saber como configurar seu ambiente de testes e submeter suas alterações via Pull Request.

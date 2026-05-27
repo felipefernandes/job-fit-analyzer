@@ -23,7 +23,7 @@ npm install
 ```
 
 ### 3. Configurar as Variáveis de Ambiente e o Firebase de Testes
-Para não poluir o banco de dados de produção do projeto principal e permitir que você faça testes livremente, você precisará configurar seu próprio projeto do Firebase de testes.
+Para não poluir o banco de dados de produção do projeto principal e permitir que você faça testes livremente, você precisará configurar seu próprio projeto do Firebase de testes. Mova as credenciais estáticas de [src/firebase.js](./src/firebase.js) para variáveis locais no seu `.env` para que o repositório permaneça livre de chaves hardcoded.
 
 1. Acesse o [Console do Firebase](https://console.firebase.google.com/) e clique em **Adicionar projeto** (é totalmente gratuito).
 2. Na tela inicial do seu projeto Firebase, registre um aplicativo Web clicando no ícone do navegador (`</>`).
@@ -35,7 +35,7 @@ Para não poluir o banco de dados de produção do projeto principal e permitir 
 5. Preencha os campos `VITE_FIREBASE_*` no seu arquivo `.env` local com as chaves copiadas do seu projeto Firebase.
 6. **Configuração de Serviços no seu Firebase:**
    * **Authentication:** No menu lateral do console do Firebase, acesse *Autenticação*, ative o provedor de login por **E-mail/Senha**.
-   * **Firestore Database:** Acesse *Firestore Database*, clique em *Criar banco de dados* (selecione o modo de teste ou produção). Certifique-se de implantar as regras contidas no arquivo `firestore.rules` do projeto para garantir a segurança dos testes.
+   * **Firestore Database:** Acesse *Firestore Database*, clique em *Criar banco de dados* (selecione o modo de teste ou produção). Certifique-se de implantar as regras contidas no arquivo [firestore.rules](./firestore.rules) do projeto para garantir a segurança dos testes.
 7. Com isso feito, inicie o servidor de desenvolvimento local:
    ```bash
    npm run dev
