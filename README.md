@@ -23,7 +23,7 @@ npm run dev
 O projeto estará disponível no navegador através do endereço [http://localhost:5173/](http://localhost:5173/).
 
 > [!NOTE]
-> **Configuração das Chaves de API**: Como as chaves de API do Gemini e Groq não são salvas no arquivo `.env` para evitar exposição em ambientes de deploy, você deve configurá-las diretamente na interface do usuário (através do ícone de configurações ⚙️). Elas serão mantidas de forma segura apenas no `localStorage` do seu próprio navegador.
+> **Configuração das Chaves de API**: Como as chaves de API não são salvas no arquivo `.env` para evitar exposição em ambientes de deploy, você deve configurá-las diretamente na página de Perfil no painel da aplicação. Elas são criptografadas client-side e armazenadas de forma segura no banco de dados Firestore, sendo descriptografadas apenas durante a sua sessão local no navegador.
 
 ### Passo 3: Build de Produção
 Para compilar a aplicação otimizada para produção:
@@ -38,9 +38,7 @@ npm run build
 ### 1. Fluxo de Visualização (Views)
 A aplicação possui três estados de renderização principais controlados pela variável de estado `view`:
 * **`loading`**: Exibido enquanto o currículo salvo está sendo recuperado do armazenamento local.
-* **`setup`**: Tela inicial de onboarding (FTUE) e edição de currículo onde o usuário pode optar por:
-  - **Colar texto/markdown** diretamente na caixa de entrada ou **importar arquivos locais** (.pdf, .docx, .odt, .txt, .md) extraídos de forma segura 100% no navegador (client-side).
-  - **Fornecer um link de Google Docs Público**, importando-o e convertendo-o de forma automática.
+* **`setup`**: Tela inicial de onboarding (FTUE) e edição de currículo onde o usuário pode optar por colar texto/markdown diretamente na caixa de entrada ou importar arquivos locais (.pdf, .docx, .odt, .txt, .md) extraídos de forma segura 100% no navegador (client-side).
 * **`analyze`**: Painel principal onde o usuário fornece os dados da vaga e visualiza os relatórios de fit.
 
 ### 2. Armazenamento Local e Resiliência

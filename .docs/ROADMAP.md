@@ -12,7 +12,7 @@ Cada fase entrega valor funcional — o produto é utilizável ao final de cada 
 ## Estado Atual (MVP publicado no Firebase)
 
 O que já funciona:
-- [x]- Upload de currículo (Markdown ou link de Google Docs público)
+- [x] Upload de currículo (Markdown ou arquivos locais .pdf, .docx, .odt, .txt, .md)
 - [x]- Configuração de API key do usuário (Gemini ou Groq como fallback)
 - [x]- Input da vaga (URL com web search ou texto colado)
 - [x]- Score de compatibilidade (0–100) com análise de fit/gaps
