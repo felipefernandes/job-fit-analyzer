@@ -99,10 +99,9 @@ export const deleteUserData = async (uid) => {
         await deleteDoc(resumeRef);
 
         // 3. Apagar chaves de API
-        const geminiKeyRef = doc(db, "users", uid, "llmKeys", "gemini");
-        await deleteDoc(geminiKeyRef);
-        const groqKeyRef = doc(db, "users", uid, "llmKeys", "groq");
-        await deleteDoc(groqKeyRef);
+        const providers = ["gemini", "groq", "openai", "anthropic", "openrouter"];
+        const deleteKeyPromises = providers.map(p => deleteDoc(doc(db, "users", uid, "llmKeys", p)));
+        await Promise.all(deleteKeyPromises);
 
         // 4. Apagar todo o histórico de análises
         const analysesRef = collection(db, "users", uid, "analyses");
