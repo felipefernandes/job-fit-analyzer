@@ -92,9 +92,10 @@ export default function Profile() {
                 }
                 setKeys(loadedKeys);
 
-                // Se o usuário não tem currículo E não tem chaves configuradas, ativa os coach marks automaticamente!
+                // Se o usuário não tem currículo E não tem chaves configuradas, e ainda não concluiu o tutorial, ativa os coach marks!
                 const hasResume = r && r.content && r.content.trim().length > 0;
-                if (!hasResume && !hasKeys) {
+                const onboardingCompleted = localStorage.getItem('jobfit_profile_onboarding_completed') === 'true';
+                if (!hasResume && !hasKeys && !onboardingCompleted) {
                     setOnboardingStartStep(0);
                     setIsOnboardingActive(true);
                 }

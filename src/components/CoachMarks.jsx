@@ -8,7 +8,16 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export default function CoachMarks({ steps, startStep = 0, onComplete }) {
     const [currentStep, setCurrentStep] = useState(startStep);
     const [coords, setCoords] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const tooltipRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const step = steps[currentStep];
 
@@ -188,7 +197,22 @@ export default function CoachMarks({ steps, startStep = 0, onComplete }) {
             {/* Tooltip dialog bubble */}
             <div 
                 ref={tooltipRef}
-                style={{
+                style={isMobile ? {
+                    position: 'fixed',
+                    bottom: 20,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 'calc(100% - 32px)',
+                    maxWidth: 340,
+                    background: '#13131f',
+                    border: '1px solid #00d4ff',
+                    borderRadius: 12,
+                    padding: '1.25rem',
+                    boxShadow: '0 -8px 32px rgba(0, 212, 255, 0.25), 0 8px 32px rgba(0, 0, 0, 0.5)',
+                    zIndex: 9999,
+                    color: '#ddddf5',
+                    fontFamily: "'DM Sans', sans-serif"
+                } : {
                     position: 'absolute',
                     top: coords.top,
                     left: coords.left,
