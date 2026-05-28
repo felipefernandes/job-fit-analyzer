@@ -352,6 +352,78 @@ Documento em `/docs/decisions/001-multi-provider-architecture.md` explicando: po
 
 ---
 
+## Fase 1.5 — Observabilidade Admin
+
+---
+
+### [ ] 1.5.1 — Integração Langfuse: Tracing Básico
+
+**Escopo:**
+Integrar Langfuse SDK na aplicação (client-side ou Cloud Functions). Cada chamada de LLM para análise de currículo deve gerar um trace contendo: modelo utilizado, tokens de entrada, tokens de saída, latência da resposta, custo estimado calculado por modelo, score gerado e status (sucesso/erro). Os dados do currículo e API keys do usuário NÃO devem ser enviados ao Langfuse por razões de privacidade.
+
+**Critérios de aceite:**
+- Traces aparecem no dashboard do Langfuse em tempo real após cada análise.
+- Campos capturados corretamente: `model`, `tokens_input`, `tokens_output`, `latency_ms`, `cost_usd`, `score`, `provider`, `status`.
+- Confirmação de conformidade LGPD: o texto do currículo do usuário, job description e chaves de API não constam nos metadados enviados ao Langfuse.
+- Funciona perfeitamente com a infraestrutura cloud free tier do Langfuse.
+
+**Como testar:**
+- Manual: realizar 3 análises completas no app e validar no painel do Langfuse o registro dos traces.
+- Segurança: inspecionar o JSON de carga enviado ao Langfuse pelo console de rede e no painel do Langfuse para garantir que dados de currículo ou chaves não estão presentes.
+
+---
+
+### [ ] 1.5.2 — ADR: Observabilidade Admin
+
+**Escopo:**
+Criar documento em `/docs/decisions/003-observability-admin.md` justificando a implementação do Langfuse, explicando o fluxo de dados, as métricas monitoradas de custos e latência, e as decisões de segurança/privacidade para mitigar riscos de exposição de dados de candidatos.
+
+**Critérios de aceite:**
+- Formato ADR padrão (Contexto, Decisão, Consequências).
+- Documentação explícita de quais campos são enviados e quais são omitidos.
+- Referência clara para os adaptadores de LLM configurados.
+
+**Como testar:**
+- Revisão técnica da documentação.
+
+---
+
+## Fase 1.5 — Observabilidade Admin
+
+---
+
+### [ ] 1.5.1 — Integração Langfuse: Tracing Básico
+
+**Escopo:**
+Integrar Langfuse SDK na aplicação (client-side ou Cloud Functions). Cada chamada de LLM para análise de currículo deve gerar um trace contendo: modelo utilizado, tokens de entrada, tokens de saída, latência da resposta, custo estimado calculado por modelo, score gerado e status (sucesso/erro). Os dados do currículo e API keys do usuário NÃO devem ser enviados ao Langfuse por razões de privacidade.
+
+**Critérios de aceite:**
+- Traces aparecem no dashboard do Langfuse em tempo real após cada análise.
+- Campos capturados corretamente: `model`, `tokens_input`, `tokens_output`, `latency_ms`, `cost_usd`, `score`, `provider`, `status`.
+- Confirmação de conformidade LGPD: o texto do currículo do usuário, job description e chaves de API não constam nos metadados enviados ao Langfuse.
+- Funciona perfeitamente com a infraestrutura cloud free tier do Langfuse.
+
+**Como testar:**
+- Manual: realizar 3 análises completas no app e validar no painel do Langfuse o registro dos traces.
+- Segurança: inspecionar o JSON de carga enviado ao Langfuse pelo console de rede e no painel do Langfuse para garantir que dados de currículo ou chaves não estão presentes.
+
+---
+
+### [ ] 1.5.2 — ADR: Observabilidade Admin
+
+**Escopo:**
+Criar documento em `/docs/decisions/003-observability-admin.md` justificando a implementação do Langfuse, explicando o fluxo de dados, as métricas monitoradas de custos e latência, e as decisões de segurança/privacidade para mitigar riscos de exposição de dados de candidatos.
+
+**Critérios de aceite:**
+- Formato ADR padrão (Contexto, Decisão, Consequências).
+- Documentação explícita de quais campos são enviados e quais são omitidos.
+- Referência clara para os adaptadores de LLM configurados.
+
+**Como testar:**
+- Revisão técnica da documentação.
+
+---
+
 ## Fase 2 — Prompt Engineering Estruturado
 
 ---
@@ -359,184 +431,145 @@ Documento em `/docs/decisions/001-multi-provider-architecture.md` explicando: po
 ### [ ] 2.1 — Prompt com Chain-of-Thought
 
 **Escopo:**
-Reestruturar o prompt para usar raciocínio em etapas explícitas. O LLM deve: (1) extrair skills da vaga, (2) extrair skills do CV, (3) comparar, (4) avaliar senioridade, (5) identificar keywords de ATS, (6) gerar score composto.
+Reestruturar o prompt para usar raciocínio em etapas explícitas (Chain-of-Thought). O LLM deve extrair skills da vaga, extrair skills do currículo, realizar a comparação de gaps/fits, avaliar a senioridade, identificar keywords de ATS e gerar um score composto com base nisso.
 
 **Critérios de aceite:**
-- Prompt solicita raciocínio passo a passo antes do resultado final
-- Output em JSON schema estrito com campos: `score`, `dimensions: { technical, seniority, culture, ats }`, `fitPoints`, `gapPoints`, `recommendation`, `reasoning`
-- O campo `reasoning` contém o Chain-of-Thought completo (transparência)
-- JSON schema documentado em arquivo separado (`/docs/analysis-schema.json`)
+- O prompt solicita raciocínio passo a passo antes de retornar o veredito final.
+- Output estruturado sob um JSON schema estrito contendo: `score`, `dimensions: { technical, seniority, culture, ats }`, `fitPoints`, `gapPoints`, `recommendation`, `reasoning`.
+- O campo `reasoning` contém o Chain-of-Thought completo (transparência de análise).
+- JSON schema documentado em `/docs/analysis-schema.json`.
 
 **Como testar:**
-- Manual: rodar 5 análises com pares CV+vaga variados → verificar que `reasoning` mostra etapas claras
-- Validação: output de cada análise passa pelo JSON schema sem erros
-- Qualidade: comparar scores do prompt antigo vs novo para os mesmos inputs
+- Manual: rodar 5 análises com currículos e vagas diferentes e verificar se a chave `reasoning` exibe o passo a passo lógico do modelo.
+- Validação estrutural: verificar que o parsing de JSON não falha e valida contra o schema definido.
+- Qualidade: comparar scores do prompt anterior com o atual.
 
 ---
 
 ### [ ] 2.2 — Dimensões de Análise na UI
 
 **Escopo:**
-Atualizar a interface de resultado para exibir breakdown por dimensão (técnico, senioridade, cultura, ATS) além do score geral. Cada dimensão com score parcial e breve justificativa.
+Atualizar a interface de resultados da avaliação para exibir o breakdown das 4 dimensões (Técnica, Senioridade, Cultura e ATS) além do score principal de fit.
 
 **Critérios de aceite:**
-- Score geral mantém destaque principal
-- Abaixo: 4 sub-scores com barra ou indicador visual
-- Cada dimensão clicável/expandível para ver justificativa
-- Cores consistentes com o score geral (verde/amarelo/vermelho)
+- Exibição de 4 sub-scores representados por barras de progresso ou indicadores visuais.
+- Detalhes de cada dimensão expandíveis por clique com justificativa textual correspondente.
+- Cores dinâmicas consistentes com a pontuação de fit (verde para >70, amarelo para 40-70, vermelho para <40).
 
 **Como testar:**
-- Manual: rodar análise → verificar que 4 dimensões aparecem com scores individuais
-- Visual: verificar em mobile que layout não quebra com 4 dimensões
+- Visual: testar no celular e desktop que o layout do breakdown renderiza sem bugs visuais.
 
 ---
 
 ### [ ] 2.3 — Conjunto de Testes de Qualidade do Prompt
 
 **Escopo:**
-Criar 10 pares (currículo + vaga) com scores esperados e justificativas. Usar como regression suite. Documentar em `/tests/prompt-quality/`.
+Criar um conjunto com 10 pares de currículo e vaga (regression suite) com scores e análises esperadas escritas manualmente para validar o comportamento dos prompts. Documentar em `/tests/prompt-quality/`.
 
 **Critérios de aceite:**
-- 10 pares representando cenários variados:
-  - Match alto (dev sênior para vaga sênior na mesma stack)
-  - Match médio (skills parciais, senioridade ok)
-  - Match baixo (área completamente diferente)
-  - Edge case: CV muito curto
-  - Edge case: vaga muito genérica
-- Cada par tem: score esperado (range de ±10), justificativa humana
-- Script que roda os 10 pares e compara com os scores esperados
-- Relatório de desvio (score real vs esperado)
+- 10 pares cobrindo diferentes cenários (perfeitos fits, matches parciais, áreas totalmente incompatíveis e edge cases).
+- Script local de automação que executa esses testes, lê os outputs do LLM e gera relatório de desvio (diferença entre score real e esperado).
+- Desvio médio dos testes deve ser inferior a 15 pontos.
 
 **Como testar:**
-- Automatizado: rodar o script → verificar que desvio médio é < 15 pontos
-- Manual: revisar 3 resultados detalhados e validar que o reasoning faz sentido
+- Executar o script de qualidade e analisar o relatório gerado.
 
 ---
 
 ### [ ] 2.4 — ADR: Prompt Engineering
 
 **Escopo:**
-Documento em `/docs/decisions/002-prompt-engineering.md` explicando: estrutura do prompt, por que Chain-of-Thought, quais dimensões e como foram definidas, resultados dos testes de qualidade, e iterações que foram feitas.
+Documentar em `/docs/decisions/002-prompt-engineering.md` as decisões tomadas para estruturação do prompt, os testes de qualidade realizados, e os tradeoffs encontrados (ex: maior latência/custo devido ao Chain-of-Thought versus precisão e consistência).
 
 **Critérios de aceite:**
-- Inclui versão anterior do prompt (antes) e versão atual (depois)
-- Mostra dados reais dos testes de qualidade
-- Documenta tradeoffs (ex: CoT usa mais tokens, mas melhora consistência)
+- Incluir as versões de prompt (anterior vs atual).
+- Registrar os dados coletados do conjunto de testes.
 
 **Como testar:**
-- Review: documento é compreensível e referencia dados reais
+- Revisão de leitura do ADR.
 
 ---
 
-## Fase 3 — Observabilidade LLM
+## Fase 3 — RAG para Análise Semântica do CV
 
 ---
 
-### [ ] 3.1 — Integração Langfuse: Tracing Básico
+### [ ] 3.1 — Pipeline de Embedding do Currículo
 
 **Escopo:**
-Integrar Langfuse SDK no client ou em Cloud Function. Cada chamada de LLM gera um trace com: input (sem dados sensíveis), output, tokens, latência, modelo, custo estimado, score gerado.
+Ao salvar ou atualizar o currículo no perfil, executar um pipeline local ou Cloud Function para realizar chunking inteligente por seções lógicas (experiência, educação, habilidades) do texto e gerar embeddings vetorizados. Armazenar os vetores de forma otimizada (Firestore com vector search ou similar).
 
 **Critérios de aceite:**
-- Trace aparece no dashboard Langfuse após cada análise
-- Campos capturados: model, tokens_input, tokens_output, latency_ms, cost_usd, score, provider, status (success/error)
-- Dados sensíveis (currículo, API key) NÃO são enviados ao Langfuse
-- Funciona com Langfuse cloud free tier
+- Chunking baseado em divisores semânticos (quebras de linha, headers markdown) e não tamanho arbitrário.
+- Embeddings gerados usando o modelo `text-embedding-004` (ou equivalente gratuito e eficiente).
+- O processamento não ocorre se o hash do conteúdo do currículo for idêntico ao já persistido.
 
 **Como testar:**
-- Manual: rodar 3 análises → abrir Langfuse dashboard → verificar que 3 traces aparecem com todos os campos
-- Manual: inspecionar trace no Langfuse → confirmar que currículo não aparece nos dados
+- Logs: verificar no console de desenvolvedor ou em logs do Firebase que os embeddings foram criados apenas quando há modificação no texto do currículo.
 
 ---
 
-### [ ] 3.2 — Painel de Uso In-App (Usuário)
+### [ ] 3.2 — Busca Semântica na Análise
 
 **Escopo:**
-Componente em `/app` que exibe ao usuário: total de runs, tokens gastos acumulado, custo estimado acumulado, e na última análise: latência, tokens, provider usado. Dados agregados do Firestore (não do Langfuse — Langfuse é admin-only).
+Durante a análise da vaga, extrair palavras-chave e conceitos críticos da vaga para fazer uma busca de similaridade vetorial contra os chunks de currículo salvos. Alimentar o prompt de análise apenas com os top chunks (3 a 5 mais relevantes) em vez do currículo completo.
 
 **Critérios de aceite:**
-- Exibido como card resumo na tela principal ou no perfil
-- Dados vêm do Firestore (cada análise salva já inclui tokens e custo desde task 1.1)
-- Custo calculado com tabela de preços por modelo (pode ser aproximado)
-- Atualiza ao salvar nova análise
-- Estado vazio: "Nenhuma análise realizada ainda"
+- Extração automática de palavras-chave da descrição da vaga.
+- O prompt é alimentado com o contexto dos chunks mais relevantes.
+- Redução mensurável na quantidade de tokens enviados por análise.
+- Caso o serviço vetorial falhe, o sistema usa o currículo inteiro como fallback robusto.
 
 **Como testar:**
-- Manual: rodar 3 análises → verificar que totais acumulam corretamente
-- Manual: verificar que custo muda conforme o modelo usado
+- Monitorar a contagem de tokens de entrada nos traces do Langfuse com RAG ativado versus o baseline (CV inteiro) coletado na Fase 1.5.
 
 ---
 
-### [ ] 3.3 — ADR: Observabilidade
+### [ ] 3.3 — Comparativo e ADR: RAG
 
 **Escopo:**
-Documento em `/docs/decisions/003-observability.md`: por que Langfuse, o que é capturado, o que é excluído (privacidade), como os dados do Langfuse complementam os dados do Firestore, e como interpretar o dashboard.
+Rodar a suíte de testes (10 pares) utilizando a estratégia RAG e mapear os desvios de score, latência, custos e tokens. Criar o ADR `/docs/decisions/004-rag-architecture.md` documentando os dados comparativos e justificando a escolha dos algoritmos de similaridade e chunking.
 
 **Critérios de aceite:**
-- Explica a separação: Langfuse = admin/dev, Firestore aggregation = usuário
-- Documenta quais dados NÃO são enviados ao Langfuse e por quê
-- Inclui screenshot ou descrição do dashboard admin
+- Tabela de comparação direta anexada ao ADR.
+- Justificativa clara sobre o impacto do RAG na qualidade versus economia de tokens.
 
 **Como testar:**
-- Review: documento é compreensível e coerente com a implementação
+- Revisão do relatório e ADR.
 
 ---
 
-## Fase 4 — RAG para Análise Semântica do CV
+## Fase 4 — Painel de Uso In-App
 
 ---
 
-### [ ] 4.1 — Pipeline de Embedding do Currículo
+### [ ] 4.1 — Painel de Uso In-App (Usuário)
 
 **Escopo:**
-Ao salvar/atualizar o currículo no perfil, executar pipeline: chunking do texto → geração de embeddings → armazenamento dos vetores. Chunking por seções semânticas (experiência, formação, skills, etc), não por tamanho fixo.
+Desenvolver componente visual em `/app` ou na página de perfil que exibe estatísticas acumuladas do uso do usuário. **Ajuste Fino:** O painel deve focar apenas no consumo operacional (número de análises, tokens acumulados, e métricas da última run como latência e provider). Não exibir informações financeiras estimadas em dólares (USD) para o usuário final, pois isso gera sobrecarga visual e cognitiva desnecessária. O registro de custos em USD continuará a ser gravado no Firestore no histórico para auditoria interna de admin e rastreio de baseline no Langfuse.
 
 **Critérios de aceite:**
-- Chunking identifica seções do CV (heurística: headers MD, quebras de linha dupla)
-- Cada chunk gera um embedding (modelo: `text-embedding-004` do Gemini ou equivalente gratuito)
-- Vetores armazenados no Firestore (com extensão de vector search) ou em solução in-memory para MVP
-- Pipeline roda automaticamente ao salvar CV e exibe feedback de progresso
-- Se o CV não mudar, não reprocessa (hash comparison)
+- Interface limpa com cards exibindo: Total de Avaliações Realizadas, Tokens Gastos (Acumulado) e Detalhes da Última Run (Latência, Tokens e Provedor utilizado).
+- Nenhum valor financeiro (USD / R$) é exibido no frontend para o usuário final.
+- Os custos calculados continuam sendo salvos nos metadados da análise no Firestore.
 
 **Como testar:**
-- Manual: salvar CV → verificar no Firestore/logs que chunks e embeddings foram gerados
-- Manual: salvar o mesmo CV sem mudanças → verificar que não reprocessa
-- Manual: alterar 1 seção do CV → verificar que reprocessa
+- Validar visualmente que o componente no dashboard ou perfil renderiza todas as estatísticas sem menção a dólares ou valores financeiros.
+- Verificar se novos dados são acrescidos aos acumulados após a conclusão de uma análise.
 
 ---
 
-### [ ] 4.2 — Busca Semântica na Análise
+### [ ] 4.2 — ADR: Painel de Uso e Métricas
 
 **Escopo:**
-Na hora da análise: extrair keywords/contexto da vaga → buscar os N chunks mais relevantes do CV → montar contexto otimizado para o prompt (em vez de enviar CV inteiro).
+Criar ou atualizar o ADR de observabilidade com o comparativo real entre o consumo pré-RAG (Fase 1.5) e pós-RAG (Fase 3), validando o retorno sobre o investimento técnico de RAG a partir das métricas reais acumuladas no Firestore/Langfuse de admin versus o que é exibido para o usuário.
 
 **Critérios de aceite:**
-- Keywords da vaga extraídas (pode ser via LLM call rápido ou heurística TF-IDF)
-- Top 3-5 chunks mais similares retornados pela busca vetorial
-- Prompt montado com chunks relevantes em vez do CV inteiro
-- Token count do prompt é mensurável e menor que o approach de CV inteiro
-- Fallback: se RAG falhar, usar CV inteiro (comportamento anterior)
+- Mapeamento e documentação da decisão de não expor USD na UI do usuário final.
+- Comparação estatística consolidada baseada em métricas reais.
 
 **Como testar:**
-- Manual: rodar análise para vaga técnica → verificar que chunks de experiência técnica são priorizados
-- Manual: comparar token count de análise com RAG vs sem RAG
-- Manual: simular falha no RAG → verificar que fallback para CV inteiro funciona
-
----
-
-### [ ] 4.3 — Comparativo e ADR: RAG
-
-**Escopo:**
-Rodar os 10 pares de teste (task 2.3) com e sem RAG. Documentar comparativo de: score, token count, custo, qualidade percebida. Documentar decisões em `/docs/decisions/004-rag-architecture.md`.
-
-**Critérios de aceite:**
-- Tabela comparativa com os 10 pares: score (com/sem RAG), tokens (com/sem), delta
-- ADR documenta: estratégia de chunking, modelo de embedding, por que essa abordagem, tradeoffs
-- Conclusão honesta: RAG melhorou, piorou, ou foi neutro? Em quais cenários?
-
-**Como testar:**
-- Automatizado: script que roda os 10 pares nos dois modos e gera relatório
-- Review: ADR é honesto e baseado em dados reais
+- Revisão do ADR.
 
 ---
 
@@ -547,84 +580,71 @@ Rodar os 10 pares de teste (task 2.3) com e sem RAG. Documentar comparativo de: 
 ### [ ] 5.1 — README.md Exemplar
 
 **Escopo:**
-README no root do repositório cobrindo: o que é, para quem, screenshot/GIF, stack, arquitetura (diagrama), como rodar local, como contribuir, licença.
+Refinar o `README.md` raiz para incluir um diagrama visual de arquitetura completo, além de organizar os badges e links rápidos.
 
 **Critérios de aceite:**
-- Primeira seção: o que é + screenshot (acima da dobra do GitHub)
-- Diagrama de arquitetura (Mermaid ou imagem)
-- Seção de stack com justificativa de 1 linha por tecnologia
-- Instruções de setup local (com e sem Docker)
-- Link para ADRs, CONTRIBUTING, LICENSE
-- Badges: build status, license, tech stack
+- Diagrama de arquitetura de dados e infraestrutura em formato Mermaid ou imagem embutida.
+- Badges de build status e licença no início do arquivo.
+- Links rápidos estruturados para a documentação de ADRs e guias de contribuição.
 
 **Como testar:**
-- Review: abrir no GitHub → é compreensível em 30 segundos?
-- Review: seguir instruções de setup local → funciona?
+- Visualizar o README renderizado localmente no editor ou no repositório.
 
 ---
 
 ### [ ] 5.2 — ARCHITECTURE.md + Compilação de ADRs
 
 **Escopo:**
-Documento de arquitetura com diagrama de componentes, fluxo de dados, e referência para ADRs individuais. Organizar `/docs/decisions/` com índice.
+Criar o arquivo `/docs/ARCHITECTURE.md` para descrever os componentes da aplicação (Landing, Auth, App, LLM Services, Local parsing, Firestore) e estruturar a pasta `/docs/decisions/` com um índice unificado de todos os ADRs criados (001 a 004).
 
 **Critérios de aceite:**
-- Diagrama mostra: Landing → Auth → App → LLM Provider → Langfuse → Firestore
-- Fluxo de dados de uma análise documentado passo a passo
-- Índice de ADRs com links e resumo de 1 linha cada
+- Índice claro e linkado de todas as decisões arquiteturais.
+- Explicação do fluxo de dados e controle entre frontend, banco e APIs de IA.
 
 **Como testar:**
-- Review: alguém de fora consegue entender a arquitetura lendo só este documento?
+- Validar links internos e leitura do fluxo.
 
 ---
 
-### [ ] 5.3 — CONTRIBUTING.md + LICENSE
+### [x] 5.3 — CONTRIBUTING.md + LICENSE
 
 **Escopo:**
-Guidelines de contribuição e licença do projeto.
-
-**Critérios de aceite:**
-- CONTRIBUTING: como rodar local, como criar branch, padrão de commit (conventional commits), como abrir PR
-- LICENSE: MIT (mais permissivo, melhor para visibilidade)
-
-**Como testar:**
-- Review: seguir o CONTRIBUTING como se fosse contribuidor externo
+Criar diretrizes de contribuição contendo o fluxo de GitFlow, padrões de commit e configuração de ambiente, além da escolha de licença. **Item concluído!** Já criados e estruturados com licença MIT e diretrizes detalhadas de Pull Requests.
 
 ---
 
 ### [ ] 5.4 — Docker Compose para Dev Local
 
 **Escopo:**
-Configuração Docker que sobe o app localmente sem precisar de conta Firebase (usa Firebase Emulator Suite).
+Configurar um ambiente contêinerizado que configure e execute o app localmente com o Firebase Emulator Suite, facilitando a contribuição de novos desenvolvedores de forma agnóstica de sistemas operacionais.
 
 **Critérios de aceite:**
-- `docker-compose up` sobe: app + Firebase Emulators (Auth, Firestore, Hosting)
-- README de setup local referencia este método
-- Seed data opcional para testar com dados de exemplo
+- Execução de `docker-compose up` sobe todo o ecossistema (Vite dev server + Emuladores do Firebase: Auth, Firestore e Hosting).
+- Instruções detalhadas adicionadas no `README.md`.
 
 **Como testar:**
-- Manual: clonar repo fresco → `docker-compose up` → app funciona no localhost
+- Rodar o comando em ambiente limpo e verificar o pleno funcionamento dos emuladores locais e do app na porta correspondente.
 
 ---
 
 ### [ ] 5.5 — CI: GitHub Actions
 
 **Escopo:**
-Pipeline básica de CI no PR: lint, type check, testes unitários, build.
+Criar uma pipeline básica de integração contínua baseada em GitHub Actions, executada a cada Pull Request em direção à branch `main` ou `develop`.
 
 **Critérios de aceite:**
-- Roda em todo PR para `main`
-- Steps: install → lint → type check → test → build
-- Badge de status no README
-- Falha bloqueia merge (branch protection rule)
+- Executa passos: `install`, `lint`, `type check`, `test` e `build`.
+- Falhas em qualquer uma das etapas bloqueiam a aprovação automática do PR.
+- Arquivo de workflow criado em `.github/workflows/ci.yml`.
 
 **Como testar:**
-- Abrir PR com erro de lint proposital → verificar que CI falha
-- Abrir PR limpo → verificar que CI passa e badge atualiza
+- Abrir um PR com erro proposital de tipo ou lint e verificar o travamento da pipeline.
 
 ---
 
 ## Backlog Geral / Ideias Futuras (Sem Fase Definida)
+
+---
 
 ### [ ] F.1 — Estratégia de Web Scraping Agnóstica e Confiável para Vagas
 
