@@ -99,7 +99,7 @@ export const deleteUserData = async (uid) => {
         await deleteDoc(resumeRef);
 
         // 3. Apagar chaves de API
-        const providers = ["gemini", "groq", "openai", "anthropic", "openrouter"];
+        const providers = ["gemini", "groq", "openai", "anthropic", "openrouter", "deepseek"];
         const deleteKeyPromises = providers.map(p => deleteDoc(doc(db, "users", uid, "llmKeys", p)));
         await Promise.all(deleteKeyPromises);
 

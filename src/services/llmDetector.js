@@ -40,7 +40,8 @@ export const getProviderDisplayName = (provider) => {
         groq: 'Groq',
         openai: 'OpenAI',
         anthropic: 'Anthropic Claude',
-        openrouter: 'OpenRouter'
+        openrouter: 'OpenRouter',
+        deepseek: 'DeepSeek'
     };
     return names[provider] || provider;
 };
@@ -51,7 +52,8 @@ export const getProviderHelpUrl = (provider) => {
         groq: 'https://console.groq.com/keys',
         openai: 'https://platform.openai.com/api-keys',
         anthropic: 'https://console.anthropic.com/settings/keys',
-        openrouter: 'https://openrouter.ai/keys'
+        openrouter: 'https://openrouter.ai/keys',
+        deepseek: 'https://platform.deepseek.com/api_keys'
     };
     return urls[provider] || '#';
 };
