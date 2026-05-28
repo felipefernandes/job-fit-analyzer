@@ -5,6 +5,7 @@ import { deleteCurrentUserAccount } from '../services/auth';
 import { parseResumeFile } from '../services/fileParser';
 import CoachMarks from '../components/CoachMarks';
 import { detectLlmProvider, getProviderDisplayName, getProviderHelpUrl } from '../services/llmDetector';
+import { testProviderKey } from '../services/llm';
 
 export default function Profile() {
     const { user } = useAuth();
@@ -12,7 +13,7 @@ export default function Profile() {
     // States
     const [profile, setProfile] = useState({ displayName: user?.displayName || '' });
     const [resume, setResume] = useState({ content: '', source: 'markdown', sourceUrl: '' });
-    const [keys, setKeys] = useState({ gemini: '', groq: '', openai: '', anthropic: '', openrouter: '' });
+    const [keys, setKeys] = useState({ gemini: '', groq: '', openai: '', anthropic: '', openrouter: '', deepseek: '' });
     const [loading, setLoading] = useState(true);
     
     const [nameStatus, setNameStatus] = useState({ type: '', message: '' });
@@ -80,7 +81,7 @@ export default function Profile() {
                 
                 const loadedKeys = {};
                 let hasKeys = false;
-                for (const provider of ['gemini', 'groq', 'openai', 'anthropic', 'openrouter']) {
+                for (const provider of ['gemini', 'groq', 'openai', 'anthropic', 'openrouter', 'deepseek']) {
                     const keyVal = await getLlmKey(user.uid, provider);
                     if (keyVal) {
                         loadedKeys[provider] = '••••••••' + keyVal.slice(-4);
@@ -191,9 +192,18 @@ export default function Profile() {
 
     const handleTestKey = async (provider) => {
         showKeyStatus(provider, `Testando...`, 'loading', 0);
-        setTimeout(() => {
-            showKeyStatus(provider, `Simulada como OK!`);
-        }, 1000);
+        try {
+            const plainKey = await getLlmKey(user.uid, provider);
+            if (!plainKey) {
+                showKeyStatus(provider, `Chave não encontrada.`, 'error');
+                return;
+            }
+            await testProviderKey(provider, plainKey);
+            showKeyStatus(provider, `Conexão OK!`);
+        } catch (e) {
+            console.error(e);
+            showKeyStatus(provider, e.message || `Erro.`, 'error', 6000);
+        }
     };
 
     const handleDeleteAccount = async () => {
@@ -303,7 +313,17 @@ export default function Profile() {
                 </div>
                 
                 <div style={{ display: "flex", alignItems: "center", gap: 15, marginTop: 10 }}>
-                    <button style={{ ...btnStyle, flex: 1 }} onClick={handleSaveResume} disabled={resumeStatus.type === 'loading'}>
+                    <button 
+                        style={{ 
+                            ...btnStyle, 
+                            flex: 1,
+                            background: (!resume?.content || !resume.content.trim() || resumeStatus.type === 'loading') ? "#18182a" : "#22d78f",
+                            color: (!resume?.content || !resume.content.trim() || resumeStatus.type === 'loading') ? "#484868" : "#0b0b11",
+                            cursor: (!resume?.content || !resume.content.trim() || resumeStatus.type === 'loading') ? "not-allowed" : "pointer"
+                        }} 
+                        onClick={handleSaveResume} 
+                        disabled={!resume?.content || !resume.content.trim() || resumeStatus.type === 'loading'}
+                    >
                         {resumeStatus.type === 'loading' ? 'Processando...' : 'Salvar Currículo'}
                     </button>
                     {renderStatus(resumeStatus)}
@@ -412,6 +432,7 @@ export default function Profile() {
                                             <option value="openai">OpenAI</option>
                                             <option value="anthropic">Anthropic Claude</option>
                                             <option value="openrouter">OpenRouter</option>
+                                            <option value="deepseek">DeepSeek</option>
                                         </select>
                                         {manualProvider && (
                                             <a 

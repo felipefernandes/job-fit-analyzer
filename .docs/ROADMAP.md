@@ -64,11 +64,11 @@ O que já funciona:
 **Objetivo:** O usuário não fica preso a um provider. O sistema tenta alternativas automaticamente se o provider principal falhar.
 
 **Entregas:**
-- [ ] 1. Suporte a múltiplos providers: Gemini, Groq, OpenRouter, Anthropic Claude, DeepSeek
-- [ ] 2. Interface para o usuário cadastrar keys de diferentes providers com prioridade
-- [ ] 3. Lógica de fallback: se provider 1 falhar (timeout, rate limit, erro), tenta provider 2
-- [ ] 4. Feedback visual de qual provider foi utilizado na análise
-- [ ] 5. Documentação (ADR) explicando a arquitetura de roteamento
+- [x] 1. Suporte a múltiplos providers: Gemini, Groq, OpenRouter, Anthropic Claude, DeepSeek
+- [x] 2. Interface para o usuário cadastrar keys de diferentes providers com prioridade
+- [x] 3. Lógica de fallback: se provider 1 falhar (timeout, rate limit, erro), tenta provider 2
+- [x] 4. Feedback visual de qual provider foi utilizado na análise
+- [x] 5. Documentação (ADR) explicando a arquitetura de roteamento
 
 **Resultado:** Análise mais confiável. Usuário pode usar o provider mais barato ou o que já tem key.
 

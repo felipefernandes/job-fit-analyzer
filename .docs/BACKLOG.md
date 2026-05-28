@@ -283,7 +283,7 @@ Adicionar suporte a upload e extração de texto client-side de arquivos PDF, DO
 
 ---
 
-### [ ] 1.1 — Abstração de Provider LLM
+### [x] 1.1 — Abstração de Provider LLM
 
 **Escopo:**
 Criar camada de abstração que isola o restante do app de providers específicos. Interface unificada: `analyze(resume, jobDescription, config) → AnalysisResult`. Implementar adapters para: Gemini, Groq. Os demais entram em tasks separadas.
@@ -302,7 +302,7 @@ Criar camada de abstração que isola o restante do app de providers específico
 
 ---
 
-### [ ] 1.2 — Adapters Adicionais
+### [x] 1.2 — Adapters Adicionais
 
 **Escopo:**
 Implementar adapters para: OpenRouter, Anthropic Claude, DeepSeek. Mesma interface da task 1.1.
@@ -318,7 +318,7 @@ Implementar adapters para: OpenRouter, Anthropic Claude, DeepSeek. Mesma interfa
 
 ---
 
-### [ ] 1.3 — Lógica de Fallback
+### [x] 1.3 — Lógica de Fallback
 
 **Escopo:**
 Implementar orquestrador que tenta providers em ordem de prioridade definida pelo usuário. Se o provider principal falhar com erro recuperável (rate limit, timeout), tenta o próximo. Erros de auth (key inválida) não disparam fallback — reportam direto.
@@ -337,7 +337,7 @@ Implementar orquestrador que tenta providers em ordem de prioridade definida pel
 
 ---
 
-### [ ] 1.4 — ADR: Arquitetura Multi-Provider
+### [x] 1.4 — ADR: Arquitetura Multi-Provider
 
 **Escopo:**
 Documento em `/docs/decisions/001-multi-provider-architecture.md` explicando: por que múltiplos providers, como funciona o fallback, quais tradeoffs (ex: inconsistência de qualidade entre modelos), e quais alternativas foram consideradas (ex: OpenRouter como gateway único).
