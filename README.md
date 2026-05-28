@@ -35,41 +35,53 @@ npm run build
 
 ## 🛠️ Funcionamento e Fluxo da Aplicação
 
-### 1. Fluxo de Visualização (Views)
-A aplicação possui três estados de renderização principais controlados pela variável de estado `view`:
-* **`loading`**: Exibido enquanto o currículo salvo está sendo recuperado do armazenamento local.
-* **`setup`**: Tela inicial de onboarding (FTUE) e edição de currículo onde o usuário pode optar por colar texto/markdown diretamente na caixa de entrada ou importar arquivos locais (.pdf, .docx, .odt, .txt, .md) extraídos de forma segura 100% no navegador (client-side).
-* **`analyze`**: Painel principal onde o usuário fornece os dados da vaga e visualiza os relatórios de fit.
+O Job Fit Analyzer evoluiu de uma ferramenta estática para uma plataforma completa integrada ao **Firebase**:
 
-### 2. Armazenamento Local e Resiliência
-O currículo do candidato é salvo localmente no navegador:
-* **Estratégia de Persistência**: A aplicação tenta usar o objeto de sandbox `window.storage` (com métodos `.set()` e `.get()`).
-* **Fallback de Compatibilidade**: Caso a API do sandbox não esteja disponível (por exemplo, ao rodar localmente no Chrome/Firefox padrão), a aplicação faz um fallback transparente para o **`localStorage`** padrão do navegador (`localStorage.getItem()` e `localStorage.setItem()`).
+### 1. Autenticação e Rotas
+* **Firebase Auth**: Login facilitado via Google Sign-In.
+* **Rotas da Aplicação**:
+  * `/` (Landing Page): Apresentação do produto com termos e políticas.
+  * `/app` (Nova Análise): Entrada de vagas (URL com raspagem de conteúdo ou texto colado).
+  * `/app/history` (Histórico): Histórico de avaliações salvas no Firestore.
+  * `/app/profile` (Perfil): Gerenciamento de dados, upload de currículo (.pdf, .docx, .odt, .txt, .md) e chaves de API.
+  * `/terms` e `/privacy`: Documentos regulatórios e preferências de LGPD.
+
+### 2. Persistência de Dados (Firestore)
+* O currículo e os metadados são salvos na coleção `users/{uid}`.
+* **Criptografia Client-Side**: As chaves de API dos provedores de LLM são criptografadas localmente no navegador (usando chaves derivadas do UID do usuário por AES-GCM) antes de serem enviadas para o Firestore.
 
 ---
 
-## 🤖 Arquitetura Multi-Modelos (Orquestrador de IA)
+## 🤖 Arquitetura Multi-Modelos e Fallback Resiliente
 
-O Job Fit Analyzer opera sob uma estrutura resiliente de duas camadas para realizar o processamento linguístico do currículo e das vagas:
+O Job Fit Analyzer opera sob uma estrutura unificada e altamente resiliente para chamadas a Large Language Models (LLMs) client-side:
 
-### 1. Provedor Padrão: Gemini 2.5 Flash (Google)
-* O **Gemini 2.5 Flash** é a escolha principal pelo seu custo-benefício, velocidade e suporte a grandes contextos.
-* **Busca Web**: Ao analisar links de vagas ou importar do Google Docs, habilitamos o recurso nativo **Google Search Grounding** na API (`tools: [{ googleSearch: {} }]`). Isso instrui o modelo a realizar a busca e obter as informações em tempo real diretamente.
-* **JSON Estrito**: O modelo é configurado para responder exclusivamente em JSON estruturado de acordo com o esquema da aplicação.
+### 1. Provedores Suportados
+A aplicação suporta seis provedores principais de IA, permitindo que o usuário traga suas próprias chaves de API:
+* **Gemini (Google)**: Provedor principal sugerido (tier gratuito generoso). Suporta a ferramenta nativa de **Google Search Grounding** para raspar dados de vagas via links da web.
+* **Groq**: Extremamente rápido, utilizando o modelo **Llama 3.3 70B**.
+* **OpenAI**: Suporte a modelos de mercado como o **GPT-4o mini**.
+* **Anthropic Claude**: Suporte a modelos Claude client-side (com fallback de rede amigável sob restrições de CORS).
+* **OpenRouter**: Gateway flexível que permite acessar modelos Claude e Gemini de forma transparente e sem problemas de CORS no navegador.
+* **DeepSeek**: Modelos eficientes e de custo extremamente baixo (e.g. **DeepSeek-Chat**).
 
-### 2. Provedor de Fallback: Llama 3.3 70B (Groq)
-* Caso a API do Gemini apresente falhas de limite de requisições, erros de conexão ou chave inválida, o orquestrador `fetchLlm` intercepta o erro silenciosamente e direciona a requisição para a **Groq** utilizando o modelo **Llama 3.3 70B** (`llama-3.3-70b-versatile`).
-* A interface de resultados indica na tela qual modelo foi utilizado no processamento da análise atual.
+### 2. Cadeia de Fallback Inteligente
+Se o usuário configurar mais de uma chave de API, o serviço [llm.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/llm.js) ativa automaticamente a cadeia de fallback:
+* **Ordem de Prioridade Fixa**: O sistema tenta os provedores cadastrados na seguinte sequência: `Gemini` ➔ `Groq` ➔ `OpenAI` ➔ `Anthropic` ➔ `OpenRouter` ➔ `DeepSeek`.
+* **Tratamento de Erros Inteligente**:
+  * Erros temporários de rede, timeouts ou limites de quota (HTTP 429 / 5xx) acionam imediatamente a IA secundária da cadeia de forma silenciosa para o usuário.
+  * Erros de autenticação (chave inválida ou saldo insuficiente) abortam a cadeia de imediato para notificar o usuário diretamente e evitar erros de configuração.
+  * Se apenas uma chave estiver configurada, o fallback é desativado por completo.
 
 ---
 
 ## 📂 Estrutura de Módulos Principal
 
-* **[src/App.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/App.jsx)**: Componente único central que contém toda a lógica de negócio, chamadas REST para Gemini e Groq, orquestração de falhas, tratamento de erros, estados do onboarding flexível e renderização da interface adaptativa.
-* **[src/services/fileParser.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/fileParser.js)**: Serviço de conversão e extração de texto para múltiplos formatos de currículo (.pdf, .docx, .odt, .md, .txt) executado client-side, incluindo algoritmo de reconstrução de linhas baseada em coordenadas Y/X para PDFs.
-* **[src/index.css](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/index.css)**: Estilos globais, resets de compatibilidade, fontes personalizadas do Google Fonts (`DM Sans` e `JetBrains Mono`) e animações cyber-terminal (scanlines e blinks).
-* **[index.html](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/index.html)**: Arquivo base que define o ponto de montagem do React (`#root`).
-* **[vite.config.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/vite.config.js)**: Configurações do Vite e plugins de compilação React.
+* **[src/services/llm.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/llm.js)**: Serviço unificado de abstração de LLMs. Contém os adaptadores para as 6 APIs suportadas, tratamento e tradução de erros específicos, e o orquestrador de fallback inteligente.
+* **[src/pages/Analyzer.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/pages/Analyzer.jsx)**: Painel principal onde o usuário realiza o input da vaga, dispara a análise com os fallbacks e visualiza o feedback visual da IA utilizada.
+* **[src/pages/Profile.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/pages/Profile.jsx)**: Interface do perfil do usuário para gerenciar dados pessoais, currículo, upload local, e cadastrar chaves de API com validação real via ping.
+* **[src/services/db.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/db.js)**: Serviço de comunicação com o Firestore, incluindo criptografia client-side de chaves de API usando AES-GCM.
+* **[src/services/fileParser.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/fileParser.js)**: Serviço de conversão e extração de texto para múltiplos formatos de currículo (.pdf, .docx, .odt, .md, .txt) executado client-side.
 
 ---
 
