@@ -621,3 +621,23 @@ Pipeline básica de CI no PR: lint, type check, testes unitários, build.
 **Como testar:**
 - Abrir PR com erro de lint proposital → verificar que CI falha
 - Abrir PR limpo → verificar que CI passa e badge atualiza
+
+---
+
+## Backlog Geral / Ideias Futuras (Sem Fase Definida)
+
+### [ ] F.1 — Estratégia de Web Scraping Agnóstica e Confiável para Vagas
+
+**Escopo:**
+Substituir a raspagem de link direta via proxies client-side (que atualmente está desabilitada temporariamente por inconsistências de formatação e bloqueios de portais de vagas) por uma estratégia robusta e agnóstica de extração de conteúdo de vagas. Estudar abordagens que lidem melhor com estruturas dinâmicas e proteções contra robôs.
+
+**Ideias de implementação:**
+- Integrar um agente multimodal/vision de IA (utilizando modelos gratuitos ou de baixíssimo custo como Gemini 2.0 Flash) que possa interpretar capturas de tela ou o DOM completo da página da vaga.
+- Usar um parser ou microsserviço de scraping headless server-side se integrável ao Firebase Functions de forma gratuita ou barata.
+- Fornecer suporte a extensões de navegador ou bookmarklets para extração do DOM limpo client-side com as credenciais do próprio usuário.
+
+**Critérios de aceite:**
+- Opção "Link da vaga" habilitada novamente na interface de análise.
+- Suporte estável aos principais portais de vagas nacionais/internacionais (Gupy, LinkedIn, Glassdoor, Indeed, Infojobs).
+- Retorno de dados limpos (título da vaga, descrição, requisitos) sem scripts ou tags ruidosas.
+- Tratamento gracioso de CAPTCHAs ou bloqueios com fallback claro explicando ao usuário o que ocorreu.

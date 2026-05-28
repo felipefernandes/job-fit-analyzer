@@ -14,7 +14,8 @@ Cada fase entrega valor funcional — o produto é utilizável ao final de cada 
 O que já funciona:
 - [x] Upload de currículo (Markdown ou arquivos locais .pdf, .docx, .odt, .txt, .md)
 - [x]- Configuração de API key do usuário (Gemini ou Groq como fallback)
-- [x]- Input da vaga (URL com web search ou texto colado)
+- [x] - Input da vaga via texto colado (job description)
+- [ ] - Input da vaga via URL com web search (Temporariamente desativado para revisão de estratégia de scraping)
 - [x]- Score de compatibilidade (0–100) com análise de fit/gaps
 - [x]- Botão "Nova avaliação"
 - [x]- Deploy funcional no Firebase Hosting
@@ -164,10 +165,11 @@ O que já funciona:
 
 ## Backlog Futuro (pós-publicação, sem compromisso)
 
-Itens que só entram se houver tração ou interesse pessoal:
+Itens que só entram se houver tração or interesse pessoal:
 
 - [ ] - Pipeline multi-agente com LangGraph (extrator de vaga → analisador de CV → pesquisador de empresa → scorer → coach)
 - [x] - Suporte a mais formatos de CV (PDF, DOCX, ODT)
+- [ ] - Nova estratégia de web scraping confiável e agnóstica de vagas (ex: usando agentes de IA multimodal ou de baixo custo)
 - [ ] - Sugestão de reescrita do CV para a vaga específica
 - [ ] - Comparativo lado a lado de múltiplas vagas
 - [ ] - Internacionalização (i18n — inglês + português)

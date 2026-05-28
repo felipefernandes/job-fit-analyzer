@@ -76,7 +76,7 @@ export default function Analyzer() {
     const [keys, setKeys] = useState({});
     const [loadingData, setLoadingData] = useState(true);
 
-    const [mode, setMode] = useState("url");
+    const [mode, setMode] = useState("text");
     const [url, setUrl] = useState("");
     const [jdText, setJdText] = useState("");
     const [loading, setLoading] = useState(false);
@@ -205,8 +205,28 @@ export default function Analyzer() {
         <div style={{ maxWidth: 840, margin: "0 auto", padding: "2rem 1.5rem" }}>
             {/* Header escondido ou minimalista, já que AppLayout tem a nav */}
             <div style={{ display: "flex", gap: 4, marginBottom: "0.875rem", background: "#13131f", border: "1px solid #1e1e32", borderRadius: 8, padding: 4, width: "fit-content" }}>
-                {[{ key: "url", label: "🔗  Link da vaga" }, { key: "text", label: "📋  Colar texto" }].map(({ key, label }) => (
-                    <button key={key} onClick={() => switchMode(key)} style={{ background: mode === key ? "#22d78f" : "transparent", color: mode === key ? "#0b0b11" : "#484868", border: "none", borderRadius: 5, padding: "6px 16px", fontFamily: "'DM Sans',sans-serif", fontSize: "0.76rem", fontWeight: mode === key ? 700 : 400, cursor: "pointer", transition: "all 0.15s" }}>
+                {[
+                    { key: "text", label: "📋  Colar texto" },
+                    { key: "url", label: "🔗  Link da vaga (Em breve)", disabled: true }
+                ].map(({ key, label, disabled }) => (
+                    <button 
+                        key={key} 
+                        onClick={() => !disabled && switchMode(key)} 
+                        disabled={disabled}
+                        style={{ 
+                            background: mode === key ? "#22d78f" : "transparent", 
+                            color: disabled ? "#484868" : (mode === key ? "#0b0b11" : "#484868"), 
+                            border: "none", 
+                            borderRadius: 5, 
+                            padding: "6px 16px", 
+                            fontFamily: "'DM Sans',sans-serif", 
+                            fontSize: "0.76rem", 
+                            fontWeight: mode === key ? 700 : 400, 
+                            cursor: disabled ? "not-allowed" : "pointer", 
+                            transition: "all 0.15s",
+                            opacity: disabled ? 0.4 : 1
+                        }}
+                    >
                         {label}
                     </button>
                 ))}

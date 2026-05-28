@@ -41,7 +41,7 @@ O Job Fit Analyzer evoluiu de uma ferramenta estática para uma plataforma compl
 * **Firebase Auth**: Login facilitado via Google Sign-In.
 * **Rotas da Aplicação**:
   * `/` (Landing Page): Apresentação do produto com termos e políticas.
-  * `/app` (Nova Análise): Entrada de vagas (URL com raspagem de conteúdo ou texto colado).
+  * `/app` (Nova Análise): Entrada de vagas (texto colado; opção de link/URL temporariamente desativada).
   * `/app/history` (Histórico): Histórico de avaliações salvas no Firestore.
   * `/app/profile` (Perfil): Gerenciamento de dados, upload de currículo (.pdf, .docx, .odt, .txt, .md) e chaves de API.
   * `/terms` e `/privacy`: Documentos regulatórios e preferências de LGPD.
@@ -58,7 +58,7 @@ O Job Fit Analyzer opera sob uma estrutura unificada e altamente resiliente para
 
 ### 1. Provedores Suportados
 A aplicação suporta seis provedores principais de IA, permitindo que o usuário traga suas próprias chaves de API:
-* **Gemini (Google)**: Provedor principal sugerido (tier gratuito generoso). Suporta a ferramenta nativa de **Google Search Grounding** para raspar dados de vagas via links da web.
+* **Gemini (Google)**: Provedor principal sugerido (tier gratuito generoso). (O suporte nativo a Google Search Grounding para raspagem de links de vagas está suspenso temporariamente).
 * **Groq**: Extremamente rápido, utilizando o modelo **Llama 3.3 70B**.
 * **OpenAI**: Suporte a modelos de mercado como o **GPT-4o mini**.
 * **Anthropic Claude**: Suporte a modelos Claude client-side (com fallback de rede amigável sob restrições de CORS).
