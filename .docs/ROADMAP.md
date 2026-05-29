@@ -71,101 +71,97 @@ O que já funciona:
 - [x] 4. Feedback visual de qual provider foi utilizado na análise
 - [x] 5. Documentação (ADR) explicando a arquitetura de roteamento
 
-**Resultado:** Análise mais confiável. Usuário pode usar o provider mais barato ou o que já tem key.
+**Resultado:** Análise 
+## Fase 1.5 — Observabilidade Admin
+
+**Tema:** Rastreabilidade e Baseline de Produção
+
+**Objetivo:** Integrar ferramenta de observabilidade para coletar métricas reais de chamadas de LLM (latência, tokens, erros e custos) sem expor dados sensíveis do usuário. Isso servirá como baseline de dados para avaliar os ganhos futuros com Prompt Engineering e RAG.
+
+**Entregas:**
+- [x] 1. Integração com Langfuse (tier free cloud ou self-hosted)
+- [x] 2. Tracing por análise: tokens in/out, modelo usado, latência, custo estimado, score gerado (excluindo currículo e API keys)
+- [x] 3. Dashboard admin (Langfuse UI): volume de análises, distribuição de modelos, taxa de erro por provider e score médio global
+- [x] 4. ADR documentando a infraestrutura de observabilidade e as políticas de privacidade de dados
+
+**Resultado:** Visibilidade total do comportamento das chamadas de LLM por trás da aplicação, permitindo criar um baseline empírico antes dos fine-tunnings de prompt e RAG.
 
 ---
 
-## Fase 2 — Prompt Engineering Estruturado + Documentação
+## Fase 2 — Prompt Engineering Estruturado
 
-**Tema:** Qualidade da análise e transparência técnica
+**Tema:** Qualidade da análise e transparência técnica com baseline de dados
 
-**Objetivo:** O prompt deixa de ser uma string fixa e vira um artefato documentado, versionado, e com Chain-of-Thought explícito.
+**Objetivo:** O prompt deixa de ser uma string fixa e vira um artefato documentado, versionado, e com Chain-of-Thought explícito, validado contra as métricas de observabilidade coletadas na Fase 1.5.
 
 **Entregas:**
 - [ ] 1. Prompt reestruturado com Chain-of-Thought: etapas explícitas de raciocínio
-- [ ] 2. Dimensões de análise definidas e documentadas:
-   - Compatibilidade técnica (skills, stack)
-   - Senioridade (anos, escopo, liderança)
-   - Cultura e valores (quando inferível)
-   - Keywords de ATS (termos que algoritmos de recrutamento buscam)
+- [ ] 2. Dimensões de análise definidas e documentadas (técnica, senioridade, cultura, ATS)
 - [ ] 3. Output estruturado (JSON schema) para parsing confiável
-- [ ] 4. ADR documentando: por que esse prompt, quais alternativas foram testadas, quais tradeoffs
+- [ ] 4. ADR documentando: decisões de design do prompt, testes e tradeoffs
 - [ ] 5. Testes de qualidade: conjunto de 5-10 pares (currículo + vaga) com scores esperados para validação de regressão
 
-**Resultado:** Análise mais rica, confiável, e o prompt é um artefato técnico auditável.
+**Resultado:** Análise mais rica, confiável, e o prompt é um artefato técnico auditável e mensurável.
 
 ---
 
-## Fase 3 — Observabilidade LLM
+## Fase 3 — RAG para Análise Semântica do Currículo
 
-**Tema:** Monitoramento de produção e custos
-
-**Objetivo:** Toda chamada de LLM é rastreada com métricas de custo, latência, tokens e erros.
-
-**Entregas:**
-- [ ] 1. Integração com Langfuse (tier free cloud ou self-hosted)
-- [ ] 2. Tracing por análise: tokens in/out, modelo usado, latência, custo estimado, score gerado
-- [ ] 3. Painel do usuário in-app:
-   - Total de runs realizadas
-   - Tokens gastos (acumulado)
-   - Custo estimado em USD
-   - Última análise: latência e tokens
-- [ ] 4. Dashboard admin (Langfuse UI ou Looker Studio):
-   - Volume de análises por dia/semana
-   - Distribuição de modelos usados
-   - Taxa de erro por provider
-   - Score médio global
-- [ ] 5. ADR documentando: por que Langfuse, como os dados fluem, o que cada métrica significa
-
-**Resultado:** Visibilidade total do comportamento do sistema em produção. Showcase de LLM Ops real.
-
----
-
-## Fase 4 — RAG para Análise Semântica do Currículo
-
-**Tema:** Inteligência na leitura do currículo
+**Tema:** Inteligência e economia de tokens na leitura de currículos
 
 **Objetivo:** Em vez de enviar o currículo inteiro no prompt (desperdiçando tokens e limitando tamanho), usar embeddings para buscar apenas os trechos relevantes para cada vaga.
 
 **Entregas:**
 - [ ] 1. Pipeline de embedding do currículo no momento do upload (chunk + embed)
-- [ ] 2. Armazenamento dos vetores (Firestore com extensão de vector search, ou Pinecone free tier)
-- [ ] 3. Na análise: extrair keywords da vaga → buscar chunks mais relevantes do CV → montar contexto otimizado
-- [ ] 4. Comparativo de qualidade: score com CV inteiro vs score com RAG (documentado)
-- [ ] 5. ADR documentando: estratégia de chunking, modelo de embedding escolhido, tradeoffs
+- [ ] 2. Armazenamento dos vetores (Firestore com vector search ou solução similar)
+- [ ] 3. Na análise: extrair keywords da vaga ➔ buscar chunks mais relevantes do CV ➔ montar contexto otimizado
+- [ ] 4. Comparativo de qualidade: score e custo com CV inteiro vs com RAG (baseado no tracing e testes)
+- [ ] 5. ADR documentando estratégia de chunking, modelo de embedding escolhido e tradeoffs
 
-**Resultado:** Análises mais precisas com CVs longos, menor consumo de tokens, demonstra domínio de RAG aplicado.
+**Resultado:** Análises precisas com CVs longos, menor consumo de tokens e melhor custo/benefício evidenciado pelo Langfuse.
 
 ---
 
-## Fase 5 — Polish, README e Publicação OSS
+## Fase 4 — Painel de Uso In-App
 
-**Tema:** O projeto como portfólio profissional
+**Tema:** Transparência de consumo para o usuário final
 
-**Objetivo:** O repositório no GitHub é apresentável, documentado, e pronto para ser referenciado em processos seletivos e no LinkedIn.
+**Objetivo:** Exibir um painel de uso in-app para o usuário acompanhar seu consumo de tokens e quantidade de análises, sem expor valores financeiros estimados em USD (mantendo a simplicidade para o usuário final).
 
 **Entregas:**
-- [ ] 1. README.md exemplar:
-   - O que é, para quem serve
-   - Screenshot/GIF do produto funcionando
-   - Arquitetura (diagrama)
-   - Stack e justificativa
-   - Como rodar local (Docker opcional)
-   - Como contribuir
-- [ ] 2. Compilação de todos os ADRs em `/docs/decisions/`
-- [ ] 3. ARCHITECTURE.md com diagrama de componentes e fluxo de dados
-- [ ] 4. CONTRIBUTING.md com guidelines
-- [ ] 5. LICENSE (MIT ou Apache 2.0)
-- [ ] 6. GitHub Actions: lint + testes automatizados no PR
-- [ ] 7. Docker Compose para rodar local (secundário, facilita contribuições)
+- [ ] 1. Painel do usuário in-app: total de runs realizadas, tokens gastos (acumulado) e na última análise (latência, tokens e provider)
+- [ ] 2. Registro de custos guardado internamente (Firestore) apenas para fins de observabilidade do administrador
+- [ ] 3. ADR atualizado com o comparativo real de consumo de tokens/custos pré e pós RAG
 
-**Resultado:** Projeto pronto para ser linkado no currículo, no LinkedIn, e em entrevistas técnicas.
+**Resultado:** O usuário acompanha seu próprio uso e estatísticas de chamadas da sua conta sem sobrecarga de informações financeiras irrelevantes (USD).
+
+---
+
+## Fase 5 — Polish, README e Publicação OSS (Parcialmente Concluído 🔄)
+
+**Tema:** O projeto como portfólio profissional e código aberto
+
+**Objetivo:** Tornar o repositório no GitHub exemplar, documentado e pronto para a comunidade ou processos seletivos.
+
+**O que já está feito:**
+- [x] README.md inicial bem estruturado
+- [x] CONTRIBUTING.md com guias de contribuição
+- [x] LICENSE (MIT) configurado
+
+**O que falta fazer:**
+- [ ] 1. Diagrama de arquitetura detalhado (Mermaid ou imagem) no README.md
+- [ ] 2. Compilação de todos os ADRs criados em `/docs/decisions/` com índice unificado
+- [ ] 3. ARCHITECTURE.md com fluxo de dados detalhado
+- [ ] 4. GitHub Actions (CI) configurado para lint, type checking e testes automatizados em PRs
+- [ ] 5. Docker Compose configurado para facilitar o setup local usando Firebase Emulator Suite
+
+**Resultado:** Repositório profissional com documentação estelar e pipeline de integração contínua ativa.
 
 ---
 
 ## Backlog Futuro (pós-publicação, sem compromisso)
 
-Itens que só entram se houver tração or interesse pessoal:
+Itens que só entram se houver tração ou interesse pessoal:
 
 - [ ] - Pipeline multi-agente com LangGraph (extrator de vaga → analisador de CV → pesquisador de empresa → scorer → coach)
 - [x] - Suporte a mais formatos de CV (PDF, DOCX, ODT)
