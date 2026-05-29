@@ -33,9 +33,7 @@ npm run build
 
 ---
 
-## 🛠️ Funcionamento e Fluxo da Aplicação
-
-O Job Fit Analyzer evoluiu de uma ferramenta estática para uma plataforma completa integrada ao **Firebase**:
+O **Job Fit Analyzer** evoluiu de uma ferramenta estática para uma plataforma completa com backend serverless integrada ao **Firebase**:
 
 ### 1. Autenticação e Rotas
 * **Firebase Auth**: Login facilitado via Google Sign-In.
@@ -46,39 +44,39 @@ O Job Fit Analyzer evoluiu de uma ferramenta estática para uma plataforma compl
   * `/app/profile` (Perfil): Gerenciamento de dados, upload de currículo (.pdf, .docx, .odt, .txt, .md) e chaves de API.
   * `/terms` e `/privacy`: Documentos regulatórios e preferências de LGPD.
 
-### 2. Persistência de Dados (Firestore)
-* O currículo e os metadados são salvos na coleção `users/{uid}`.
-* **Criptografia Client-Side**: As chaves de API dos provedores de LLM são criptografadas localmente no navegador (usando chaves derivadas do UID do usuário por AES-GCM) antes de serem enviadas para o Firestore.
+### 2. Segurança de Segredos e Chaves de API
+* **Segredos Globais e Observabilidade**: Segredos do sistema (como a chave privada do Langfuse) residem exclusivamente nas variáveis de ambiente do backend serverless (dentro de `functions/`), mitigando qualquer risco de vazamento no bundle JavaScript do navegador.
+* **Criptografia Client-Side (BYOK)**: As chaves de API opcionais fornecidas pelos próprios usuários são salvas criptografadas com AES-GCM no Firestore e transmitidas temporariamente de forma segura durante a requisição autenticada do HTTPS Callable para o backend.
 
 ---
 
-## 🤖 Arquitetura Multi-Modelos e Fallback Resiliente
+## 🤖 Arquitetura Serverless, Multi-Modelos e Observabilidade
 
-O Job Fit Analyzer opera sob uma estrutura unificada e altamente resiliente para chamadas a Large Language Models (LLMs) client-side:
+O Job Fit Analyzer opera sob uma arquitetura híbrida e altamente resiliente para chamadas a Large Language Models (LLMs) e telemetria:
 
-### 1. Provedores Suportados
-A aplicação suporta seis provedores principais de IA, permitindo que o usuário traga suas próprias chaves de API:
-* **Gemini (Google)**: Provedor principal sugerido (tier gratuito generoso). (O suporte nativo a Google Search Grounding para raspagem de links de vagas está suspenso temporariamente).
+### 1. Separação de Responsabilidades (Client vs. Backend)
+* **Frontend (Vite/React)**: Lida com a interface do usuário, upload de arquivos, parsing local de documentos, autenticação e gerenciamento de dados do perfil do usuário.
+* **Backend (Firebase Cloud Functions)**: Centraliza a execução das chamadas para os provedores de LLM e realiza o rastreamento (telemetria/observabilidade) via Langfuse em ambiente restrito e seguro de servidor.
+
+### 2. Provedores Suportados e Fallback
+A Cloud Function suporta seis provedores principais de IA, roteando as requisições dinamicamente conforme as chaves configuradas:
+* **Gemini (Google)**: Provedor principal sugerido (tier gratuito generoso).
 * **Groq**: Extremamente rápido, utilizando o modelo **Llama 3.3 70B**.
 * **OpenAI**: Suporte a modelos de mercado como o **GPT-4o mini**.
-* **Anthropic Claude**: Suporte a modelos Claude client-side (com fallback de rede amigável sob restrições de CORS).
-* **OpenRouter**: Gateway flexível que permite acessar modelos Claude e Gemini de forma transparente e sem problemas de CORS no navegador.
+* **Anthropic Claude**: Suporte a modelos Claude.
+* **OpenRouter**: Gateway flexível que permite acessar múltiplos modelos de forma transparente.
 * **DeepSeek**: Modelos eficientes e de custo extremamente baixo (e.g. **DeepSeek-Chat**).
 
-### 2. Cadeia de Fallback Inteligente
-Se o usuário configurar mais de uma chave de API, o serviço [llm.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/llm.js) ativa automaticamente a cadeia de fallback:
-* **Ordem de Prioridade Fixa**: O sistema tenta os provedores cadastrados na seguinte sequência: `Gemini` ➔ `Groq` ➔ `OpenAI` ➔ `Anthropic` ➔ `OpenRouter` ➔ `DeepSeek`.
-* **Tratamento de Erros Inteligente**:
-  * Erros temporários de rede, timeouts ou limites de quota (HTTP 429 / 5xx) acionam imediatamente a IA secundária da cadeia de forma silenciosa para o usuário.
-  * Erros de autenticação (chave inválida ou saldo insuficiente) abortam a cadeia de imediato para notificar o usuário diretamente e evitar erros de configuração.
-  * Se apenas uma chave estiver configurada, o fallback é desativado por completo.
+### 3. Observabilidade e Tracing
+Toda a execução das chamadas de LLM é rastreada em tempo real no servidor usando o **Langfuse SDK**, medindo métricas de latência, contagem de tokens de entrada/saída, erros e custos operacionais estimados, gerando visibilidade completa para o administrador.
 
 ---
 
 ## 📂 Estrutura de Módulos Principal
 
-* **[src/services/llm.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/llm.js)**: Serviço unificado de abstração de LLMs. Contém os adaptadores para as 6 APIs suportadas, tratamento e tradução de erros específicos, e o orquestrador de fallback inteligente.
-* **[src/pages/Analyzer.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/pages/Analyzer.jsx)**: Painel principal onde o usuário realiza o input da vaga, dispara a análise com os fallbacks e visualiza o feedback visual da IA utilizada.
+* **[functions/index.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/functions/index.js)**: Código da Cloud Function `analyzeJobFitHttp` do Firebase. Centraliza a lógica de fallback de IAs, o tratamento de chamadas e a integração de observabilidade via Langfuse.
+* **[src/services/llm.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/llm.js)**: Serviço cliente no frontend que dispara chamadas HTTPS seguras (`httpsCallable`) para a função serverless, desacoplando o cliente de chaves e requisições diretas de IA.
+* **[src/pages/Analyzer.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/pages/Analyzer.jsx)**: Painel principal onde o usuário realiza o input da vaga, inicia a análise e visualiza o feedback visual da IA utilizada.
 * **[src/pages/Profile.jsx](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/pages/Profile.jsx)**: Interface do perfil do usuário para gerenciar dados pessoais, currículo, upload local, e cadastrar chaves de API com validação real via ping.
 * **[src/services/db.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/db.js)**: Serviço de comunicação com o Firestore, incluindo criptografia client-side de chaves de API usando AES-GCM.
 * **[src/services/fileParser.js](file:///c:/Users/felip/OneDrive/Documents/Projects/job-fit-analyzer/src/services/fileParser.js)**: Serviço de conversão e extração de texto para múltiplos formatos de currículo (.pdf, .docx, .odt, .md, .txt) executado client-side.
