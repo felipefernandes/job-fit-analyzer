@@ -28,5 +28,6 @@ dist-ssr
 .firebase
 
 node_modules
+functions/node_modules
 .vite
 

@@ -15,11 +15,12 @@ However, since this is a client-side web application where users configure their
 
 ## Decision
 
-We have integrated the Langfuse Web SDK client-side to track traces and generations while strictly enforcing privacy-preserving filters.
+We migrated the observability architecture from a client-side execution to a **Serverless Proxy Pattern** using **Firebase Cloud Functions**, prioritizing strict security for application secrets.
 
-### 1. Client-Side Only Instrumentation
-- We initialize the `LangfuseWeb` SDK using **only** the `VITE_LANGFUSE_PUBLIC_KEY` and `VITE_LANGFUSE_BASE_URL`.
-- The secret key (`LANGFUSE_SECRET_KEY`) is **omitted** client-side to ensure the front-end application has write-only access to log traces and cannot pull sensitive records or configurations from other traces.
+### 1. Serverless Instrumentation (Firebase Functions)
+- We initialize the full `Langfuse` SDK node backend (`functions/index.js`).
+- The secret key (`LANGFUSE_SECRET_KEY`) and LLM Provider API Keys (e.g., `GEMINI_API_KEY`) are kept entirely on the server-side as protected environment variables.
+- The frontend client only invokes the proxy `httpsCallable` Firebase function, hiding all the implementation and telemetry complexity, while eliminating the critical security risk of exposing `VITE_` prefixed secret keys in the web bundle.
 
 ### 2. Privacy Redaction / Masking
 - **Input Redaction**: When creating a `generation` inside each provider adapter (e.g., `callGemini`, `callGroq`), the raw `userContent` (which contains the raw resume and job description) is completely redacted and replaced with a static string: `"[REDACTED_CV_AND_JD_FOR_PRIVACY]"`.
