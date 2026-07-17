@@ -94,42 +94,49 @@ export function AuthProvider({ children }) {
         return unsubscribe;
     }, []);
 
-    // Escuta mensagens vindas do content script da extensão para salvar histórico
+    // Escuta mensagens vindas do content script da extensão para salvar histórico e responder pedidos de sessão
     useEffect(() => {
         const handleExtensionMessage = async (event) => {
-            if (event.data && event.data.source === 'job-fit-extension' && event.data.type === 'SYNC_PENDING_ANALYSES') {
-                if (!user) {
-                    window.postMessage({ source: 'job-fit-page', type: 'SYNC_PENDING_ANALYSES_RESPONSE', success: false }, '*');
-                    return;
-                }
+            if (event.data && event.data.source === 'job-fit-extension') {
+                if (event.data.type === 'SYNC_PENDING_ANALYSES') {
+                    if (!user) {
+                        window.postMessage({ source: 'job-fit-page', type: 'SYNC_PENDING_ANALYSES_RESPONSE', success: false }, '*');
+                        return;
+                    }
 
-                console.log("[Job Fit] Sincronizando análises pendentes da extensão no Firestore...");
-                try {
-                    const { saveAnalysis } = await import('../services/db');
-                    
-                    const savePromises = event.data.analyses.map(analysis => 
-                        saveAnalysis(user.uid, {
-                            ...analysis,
-                            provider: analysis.providerUsed || 'IA'
-                        })
-                    );
-                    
-                    await Promise.all(savePromises);
-                    console.log("[Job Fit] Análises sincronizadas com sucesso!");
+                    console.log("[Job Fit] Sincronizando análises pendentes da extensão no Firestore...");
+                    try {
+                        const { saveAnalysis } = await import('../services/db');
+                        
+                        const savePromises = event.data.analyses.map(analysis => 
+                            saveAnalysis(user.uid, {
+                                ...analysis,
+                                provider: analysis.providerUsed || 'IA'
+                            })
+                        );
+                        
+                        await Promise.all(savePromises);
+                        console.log("[Job Fit] Análises sincronizadas com sucesso!");
 
-                    // Responde de volta para o content script para que a extensão limpe a fila
-                    window.postMessage({
-                        source: 'job-fit-page',
-                        type: 'SYNC_PENDING_ANALYSES_RESPONSE',
-                        success: true
-                    }, '*');
-                } catch (err) {
-                    console.error("[Job Fit] Falha ao sincronizar análises no Firestore:", err);
-                    window.postMessage({
-                        source: 'job-fit-page',
-                        type: 'SYNC_PENDING_ANALYSES_RESPONSE',
-                        success: false
-                    }, '*');
+                        // Responde de volta para o content script para que a extensão limpe a fila
+                        window.postMessage({
+                            source: 'job-fit-page',
+                            type: 'SYNC_PENDING_ANALYSES_RESPONSE',
+                            success: true
+                        }, '*');
+                    } catch (err) {
+                        console.error("[Job Fit] Falha ao sincronizar análises no Firestore:", err);
+                        window.postMessage({
+                            source: 'job-fit-page',
+                            type: 'SYNC_PENDING_ANALYSES_RESPONSE',
+                            success: false
+                        }, '*');
+                    }
+                } else if (event.data.type === 'REQUEST_SESSION') {
+                    if (user) {
+                        console.log("[Job Fit] Extensão solicitou sincronização de sessão ativa. Enviando...");
+                        syncSessionWithExtension(user);
+                    }
                 }
             }
         };
