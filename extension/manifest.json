@@ -8,7 +8,8 @@
     "sidePanel",
     "storage",
     "contextMenus",
-    "scripting"
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
     "http://*/*",
