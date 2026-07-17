@@ -11,19 +11,22 @@ export default function SidePanelApp() {
   const [manualMode, setManualMode] = useState(false);
   const [jobTitle, setJobTitle] = useState("");
   const [syncStatus, setSyncStatus] = useState("checking"); // checking | connected | disconnected
+  const [authToken, setAuthToken] = useState("");
 
   // Carrega dados iniciais do storage da extensão
   const loadStorageData = () => {
-    chrome.storage.local.get(['user', 'resume', 'keys', 'tempJobDescription'], (data) => {
+    chrome.storage.local.get(['user', 'resume', 'keys', 'authToken', 'tempJobDescription'], (data) => {
       if (data.user) {
         setUser(data.user);
         setResume(data.resume || "");
         setKeys(data.keys || null);
+        setAuthToken(data.authToken || "");
         setSyncStatus("connected");
       } else {
         setUser(null);
         setResume("");
         setKeys(null);
+        setAuthToken("");
         setSyncStatus("disconnected");
       }
 
@@ -111,21 +114,43 @@ export default function SidePanelApp() {
     
     setLoading(true);
     try {
-      // Inicializa o Firebase Functions de forma dinâmica para reaproveitar config do site
-      const { getFunctions, httpsCallable } = await import('firebase/functions');
-      const { app } = await import('../../src/firebase');
+      const projectId = "job-fit-analyzer-4f7af";
+      const region = "us-central1";
+      const endpoint = `https://${region}-${projectId}.cloudfunctions.net/analyzeJobFitHttp`;
 
-      const functions = getFunctions(app);
-      const analyzeJobFitHttp = httpsCallable(functions, 'analyzeJobFitHttp');
+      const headers = {
+        "Content-Type": "application/json"
+      };
 
-      const response = await analyzeJobFitHttp({
-        resume,
-        jobDescription: jdText,
-        keys: keys || {},
-        options: {}
+      if (authToken) {
+        headers["Authorization"] = `Bearer ${authToken}`;
+      }
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          data: {
+            resume,
+            jobDescription: jdText,
+            keys: keys || {},
+            options: {}
+          }
+        })
       });
 
-      const analysisResult = response.data;
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Erro na chamada da IA (HTTP ${res.status}): ${errorText || 'Acesso negado.'}`);
+      }
+
+      const responseJson = await res.json();
+      const analysisResult = responseJson.result;
+
+      if (!analysisResult) {
+        throw new Error("A resposta do analisador de IA veio vazia.");
+      }
+
       setResult(analysisResult);
 
       const analysisData = {
