@@ -36,6 +36,14 @@ if (!window.__jobFitContentScriptInit) {
         
         window.addEventListener('message', handleResponse);
         return true; // Mantém a resposta aberta assincronamente
+      } else if (message.type === 'REQUEST_SESSION') {
+        // Repassa solicitação de sessão para a página React do site principal
+        window.postMessage({
+          source: 'job-fit-extension',
+          type: 'REQUEST_SESSION'
+        }, '*');
+        sendResponse({ success: true });
+        return false;
       }
     });
   }

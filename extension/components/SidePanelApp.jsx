@@ -39,6 +39,16 @@ export default function SidePanelApp() {
   useEffect(() => {
     loadStorageData();
 
+    // Solicita ativamente a sessão de login para abas abertas do site principal
+    chrome.tabs.query({ url: ["https://job-fit-analyzer.web.app/*", "https://job-fit-analyzer.firebaseapp.com/*", "https://job-fit-analyzer-4f7af.web.app/*", "https://job-fit-analyzer-4f7af.firebaseapp.com/*", "http://localhost/*"] }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        tabs.forEach(tab => {
+          chrome.tabs.sendMessage(tab.id, { type: 'REQUEST_SESSION' })
+            .catch(() => { /* Silencia erros de abas que não carregaram o script ainda */ });
+        });
+      }
+    });
+
     // Escuta atualizações da sessão ou disparos de menu de contexto
     const handleMessage = (message) => {
       if (message.type === 'SESSION_UPDATED') {
