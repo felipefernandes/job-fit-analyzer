@@ -1,7 +1,5 @@
-/* global process */
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { Langfuse } from "langfuse";
-import fetch from "node-fetch";
 
 // Configuração do Langfuse baseada em variáveis de ambiente do backend
 // Essas variáveis devem ser configuradas via Firebase Secret Manager ou .env
