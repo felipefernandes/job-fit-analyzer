@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:extension": "vite --config vite.extension.config.js",
+    "build:extension": "vite build --config vite.extension.config.js && node scripts/copy-manifest.js"
   },
   "dependencies": {
     "firebase": "^12.13.0",

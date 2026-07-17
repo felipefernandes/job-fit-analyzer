@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Job Fit Analyzer Companion",
+  "version": "1.0.0",
+  "description": "Companion para análise de compatibilidade de vagas de emprego usando IA diretamente do navegador.",
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "storage",
+    "contextMenus",
+    "scripting"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "extension/sidepanel.html"
+  },
+  "action": {
+    "default_title": "Abrir Painel Job Fit"
+  },
+  "externally_connectable": {
+    "matches": [
+      "https://job-fit-analyzer.web.app/*",
+      "https://job-fit-analyzer.firebaseapp.com/*",
+      "https://job-fit-analyzer-4f7af.web.app/*",
+      "https://job-fit-analyzer-4f7af.firebaseapp.com/*",
+      "http://localhost/*"
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://job-fit-analyzer.web.app/*",
+        "https://job-fit-analyzer.firebaseapp.com/*",
+        "https://job-fit-analyzer-4f7af.web.app/*",
+        "https://job-fit-analyzer-4f7af.firebaseapp.com/*",
+        "http://localhost/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}
