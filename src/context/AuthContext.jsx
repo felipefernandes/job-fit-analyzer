@@ -23,9 +23,14 @@ export function AuthProvider({ children }) {
         }
 
         try {
-            // Busca o ID do elemento injetado pela extensão no DOM
-            const extensionId = document.documentElement.getAttribute('data-job-fit-extension-id');
-            if (!extensionId || typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
+            // IDs conhecidos da extensão para desenvolvimento e produção
+            const knownIds = [
+                document.documentElement.getAttribute('data-job-fit-extension-id'),
+                import.meta.env.VITE_CHROME_EXTENSION_ID,
+                'hgpahljmhkfcmkfliefcokolajicanap' // ID local do Felipe
+            ].filter(Boolean);
+
+            if (knownIds.length === 0 || typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) {
                 // Extensão não instalada ou não ativa nesta aba
                 return;
             }
@@ -42,23 +47,29 @@ export function AuthProvider({ children }) {
 
             const authToken = await activeUser.getIdToken();
 
-            // Envia para o background script da extensão via ID dinâmico
-            chrome.runtime.sendMessage(extensionId, {
-                type: 'SESSION_CHANGED',
-                user: {
-                    uid: activeUser.uid,
-                    displayName: activeUser.displayName,
-                    email: activeUser.email,
-                    photoURL: activeUser.photoURL
-                },
-                authToken,
-                resume: resumeContent,
-                keys: loadedKeys
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    console.warn("[Job Fit] Erro ao sincronizar sessão com a extensão:", chrome.runtime.lastError.message);
-                } else {
-                    console.log("[Job Fit] Sessão sincronizada com a extensão com sucesso:", response?.message);
+            // Envia para o background script da extensão para todos os IDs conhecidos
+            knownIds.forEach(id => {
+                try {
+                    chrome.runtime.sendMessage(id, {
+                        type: 'SESSION_CHANGED',
+                        user: {
+                            uid: activeUser.uid,
+                            displayName: activeUser.displayName,
+                            email: activeUser.email,
+                            photoURL: activeUser.photoURL
+                        },
+                        authToken,
+                        resume: resumeContent,
+                        keys: loadedKeys
+                    }, (response) => {
+                        if (chrome.runtime.lastError) {
+                            // Ignora erro de extensão não encontrada para esse ID específico
+                        } else {
+                            console.log(`[Job Fit] Sessão sincronizada com a extensão (ID: ${id}) com sucesso:`, response?.message);
+                        }
+                    });
+                } catch (err) {
+                    // Silencia erros individuais
                 }
             });
         } catch (e) {
@@ -68,9 +79,18 @@ export function AuthProvider({ children }) {
 
     const triggerExtensionClear = () => {
         try {
-            const extensionId = document.documentElement.getAttribute('data-job-fit-extension-id');
-            if (extensionId && typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-                chrome.runtime.sendMessage(extensionId, { type: 'SESSION_CLEARED' });
+            const knownIds = [
+                document.documentElement.getAttribute('data-job-fit-extension-id'),
+                import.meta.env.VITE_CHROME_EXTENSION_ID,
+                'hgpahljmhkfcmkfliefcokolajicanap'
+            ].filter(Boolean);
+
+            if (knownIds.length > 0 && typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                knownIds.forEach(id => {
+                    try {
+                        chrome.runtime.sendMessage(id, { type: 'SESSION_CLEARED' });
+                    } catch (e) {}
+                });
             }
         } catch (e) {
             // Ignora erros ao tentar limpar extensão
