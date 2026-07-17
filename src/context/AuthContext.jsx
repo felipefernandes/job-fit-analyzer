@@ -48,8 +48,10 @@ export function AuthProvider({ children }) {
             const authToken = await activeUser.getIdToken();
 
             // Envia para o background script da extensão para todos os IDs conhecidos
+            console.log("[Job Fit] Iniciando sincronização de sessão com os IDs de extensão:", knownIds);
             knownIds.forEach(id => {
                 try {
+                    console.log("[Job Fit] Tentando enviar sessão para extensão ID:", id);
                     chrome.runtime.sendMessage(id, {
                         type: 'SESSION_CHANGED',
                         user: {
@@ -63,13 +65,13 @@ export function AuthProvider({ children }) {
                         keys: loadedKeys
                     }, (response) => {
                         if (chrome.runtime.lastError) {
-                            // Ignora erro de extensão não encontrada para esse ID específico
+                            console.warn(`[Job Fit] Falha ao enviar para ID ${id}:`, chrome.runtime.lastError.message);
                         } else {
                             console.log(`[Job Fit] Sessão sincronizada com a extensão (ID: ${id}) com sucesso:`, response?.message);
                         }
                     });
                 } catch (err) {
-                    // Silencia erros individuais
+                    console.warn(`[Job Fit] Erro ao tentar enviar mensagem para ID ${id}:`, err);
                 }
             });
         } catch (e) {
@@ -153,9 +155,12 @@ export function AuthProvider({ children }) {
                         }, '*');
                     }
                 } else if (event.data.type === 'REQUEST_SESSION') {
+                    console.log("[Job Fit] Recebido REQUEST_SESSION da extensão.");
                     if (user) {
                         console.log("[Job Fit] Extensão solicitou sincronização de sessão ativa. Enviando...");
                         syncSessionWithExtension(user);
+                    } else {
+                        console.log("[Job Fit] Sincronização ignorada: Nenhum usuário autenticado no site principal.");
                     }
                 }
             }
