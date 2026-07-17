@@ -8,7 +8,7 @@ import { detectLlmProvider, getProviderDisplayName, getProviderHelpUrl } from '.
 import { testProviderKey } from '../services/llm';
 
 export default function Profile() {
-    const { user } = useAuth();
+    const { user, syncSessionWithExtension } = useAuth();
     
     // States
     const [profile, setProfile] = useState({ displayName: user?.displayName || '' });
@@ -134,6 +134,7 @@ export default function Profile() {
         try {
             await saveResumeToDb(user.uid, resume.content, resume.source, resume.sourceUrl);
             showStatus(setResumeStatus, 'Currículo salvo!');
+            if (syncSessionWithExtension) syncSessionWithExtension();
         } catch (e) {
             console.error("Erro no saveResumeToDb:", e);
             showStatus(setResumeStatus, 'Erro de permissão ou conexão.', 'error', 5000);
@@ -173,6 +174,7 @@ export default function Profile() {
             setNewKey('');
             setDetectedProvider(null);
             setManualProvider('');
+            if (syncSessionWithExtension) syncSessionWithExtension();
         } catch (e) {
             console.error(e);
             showKeyStatus(provider, `Erro.`, 'error');
@@ -185,6 +187,7 @@ export default function Profile() {
             await removeLlmKey(user.uid, provider);
             setKeys(prev => ({ ...prev, [provider]: '' }));
             showKeyStatus(provider, `Removida!`);
+            if (syncSessionWithExtension) syncSessionWithExtension();
         } catch (e) {
             console.error(e);
             showKeyStatus(provider, `Erro.`, 'error');
