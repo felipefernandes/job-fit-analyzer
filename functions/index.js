@@ -72,11 +72,49 @@ function parseJsonResponse(provider, text) {
     }
 }
 
+let cachedGeminiModel = null;
+let lastModelFetch = 0;
+
+const getLatestGeminiFlashModel = async (key) => {
+    if (cachedGeminiModel && (Date.now() - lastModelFetch < 3600000)) {
+        return cachedGeminiModel;
+    }
+
+    try {
+        const res = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`, { timeout: 10000 });
+        if (res.ok) {
+            const data = await res.json();
+            const flashModels = (data.models || [])
+                .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+                .map(m => m.name.replace(/^models\//, ''))
+                .filter(name => name.includes("flash"));
+
+            if (flashModels.length > 0) {
+                const priority = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash'];
+                for (const candidate of priority) {
+                    if (flashModels.includes(candidate)) {
+                        cachedGeminiModel = candidate;
+                        lastModelFetch = Date.now();
+                        return candidate;
+                    }
+                }
+                cachedGeminiModel = flashModels[0];
+                lastModelFetch = Date.now();
+                return cachedGeminiModel;
+            }
+        }
+    } catch (err) {
+        console.warn("Falha ao listar modelos dinamicamente da API do Gemini, usando fallback estático:", err.message);
+    }
+
+    return 'gemini-2.0-flash';
+};
+
 // === Adapters ===
 
 const callGemini = async (userContent, key, options, trace) => {
     const provider = 'gemini';
-    const modelName = 'gemini-2.5-flash';
+    const modelName = await getLatestGeminiFlashModel(key);
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${key}`;
     
     const requestBody = {
@@ -142,7 +180,7 @@ const callProvider = async (provider, userContent, key, options, trace) => {
     }
 };
 
-export const analyzeJobFitHttp = onCall(async (request) => {
+export const analyzeJobFitHttp = onCall({ cors: true, invoker: 'public' }, async (request) => {
     const { resume, jobDescription, keys, options } = request.data;
     
     if (!resume || !jobDescription) {

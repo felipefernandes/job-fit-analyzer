@@ -131,7 +131,7 @@ if (!window.__jobFitContentScriptInit) {
   hiddenElements.forEach(selector => {
     try {
       clone.querySelectorAll(selector).forEach(el => el.remove());
-    } catch (e) {
+    } catch {
       // Ignora seletores inválidos
     }
   });

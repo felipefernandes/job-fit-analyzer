@@ -100,7 +100,26 @@ export const testProviderKey = async (provider, key) => {
     try {
         switch (provider) {
             case 'gemini': {
-                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`;
+                let model = 'gemini-2.0-flash';
+                try {
+                    const listRes = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`, { timeout: 8000 });
+                    if (listRes.status === 401 || listRes.status === 403) throw new AuthError(provider);
+                    if (listRes.ok) {
+                        const data = await listRes.json();
+                        const flashModels = (data.models || [])
+                            .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+                            .map(m => m.name.replace(/^models\//, ''))
+                            .filter(name => name.includes("flash"));
+                        if (flashModels.length > 0) {
+                            const priority = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-flash'];
+                            model = priority.find(candidate => flashModels.includes(candidate)) || flashModels[0];
+                        }
+                    }
+                } catch (e) {
+                    if (e instanceof AuthError) throw e;
+                }
+
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
                 const res = await fetchWithTimeout(endpoint, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -182,7 +201,7 @@ export const testProviderKey = async (provider, key) => {
                         "Authorization": `Bearer ${key}`
                     },
                     body: JSON.stringify({
-                        model: "google/gemini-2.5-flash",
+                        model: "google/gemini-2.0-flash-001",
                         messages: [{ role: "user", content: pingPrompt }],
                         max_tokens: 5
                     }),

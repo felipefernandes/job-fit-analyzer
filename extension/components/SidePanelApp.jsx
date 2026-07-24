@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import iconImg from '../assets/icon-48.png';
 
 export default function SidePanelApp() {
   const [user, setUser] = useState(null);
@@ -239,7 +240,10 @@ export default function SidePanelApp() {
     return (
       <div className="panel-container">
         <div className="header">
-          <h1>Companion Job Fit</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <img src={iconImg} alt="Icon" style={{ width: 22, height: 22 }} />
+            <h1>Companion Job Fit</h1>
+          </div>
           <span className="header-status status-disconnected">Desconectado</span>
         </div>
         <div className="card" style={{ marginTop: 24 }}>
@@ -259,7 +263,10 @@ export default function SidePanelApp() {
     return (
       <div className="panel-container">
         <div className="header">
-          <h1>Companion Job Fit</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <img src={iconImg} alt="Icon" style={{ width: 22, height: 22 }} />
+            <h1>Companion Job Fit</h1>
+          </div>
           <span className="header-status status-connected">Conectado</span>
         </div>
         <div className="card" style={{ marginTop: 24 }}>
@@ -280,7 +287,10 @@ export default function SidePanelApp() {
     <div className="panel-container">
       {/* Header */}
       <div className="header">
-        <h1>Companion Job Fit</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <img src={iconImg} alt="Icon" style={{ width: 22, height: 22 }} />
+          <h1>Companion Job Fit</h1>
+        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {user?.photoURL && (
             <img src={user.photoURL} alt={user.displayName} style={{ width: 20, height: 20, borderRadius: '50%' }} />
