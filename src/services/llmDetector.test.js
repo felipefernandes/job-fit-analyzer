@@ -1,4 +1,3 @@
-/* global process */
 import { detectLlmProvider } from './llmDetector.js';
 
 const testCases = [

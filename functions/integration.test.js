@@ -1,4 +1,3 @@
-/* global process */
 import testEnvLib from 'firebase-functions-test';
 import { analyzeJobFitHttp } from './index.js';
 

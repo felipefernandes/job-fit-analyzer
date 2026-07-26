@@ -91,6 +91,7 @@ export default function Privacy() {
                     <li><strong>Chaves de API (LLM Providers):</strong> As chaves fornecidas por você (Gemini, Groq) para realizar o processamento das análises de IA.</li>
                     <li><strong>Histórico de Avaliações:</strong> Detalhes das vagas inseridas e os resultados de compatibilidade gerados.</li>
                     <li><strong>Dados de Navegação (Telemetria):</strong> Dados anônimos de uso do site (como páginas visitadas e erros) via Google Analytics, coletados <strong>apenas</strong> caso você forneça seu consentimento explícito.</li>
+                    <li><strong>Extensão Job Fit Companion (Chrome):</strong> A extensão do navegador coleta unicamente o texto exibido na aba ativa (por meio da permissão <code>activeTab</code>) de forma manual quando você aciona a análise de uma vaga. A extensão <strong>não coleta</strong> seu histórico de navegação, nem possui rastreadores de publicidade ou telemetria embutida, operando de forma restrita e enviando os dados exclusivamente para a API segura da nossa plataforma.</li>
                 </ul>
 
                 <h2 className="mono">2. Como Seus Dados são Protegidos e Armazenados</h2>

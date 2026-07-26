@@ -91,10 +91,12 @@ export function AuthProvider({ children }) {
                 knownIds.forEach(id => {
                     try {
                         chrome.runtime.sendMessage(id, { type: 'SESSION_CLEARED' });
-                    } catch (e) {}
+                    } catch {
+                        // Ignora falhas em abas ou extensoes inativas
+                    }
                 });
             }
-        } catch (e) {
+        } catch {
             // Ignora erros ao tentar limpar extensão
         }
     };

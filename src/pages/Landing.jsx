@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { loginWithGoogle } from '../services/auth';
+import logoImg from '../assets/logo.png';
 
 export default function Landing() {
     const { user } = useAuth();
@@ -61,8 +62,11 @@ export default function Landing() {
             `}</style>
 
             {/* Section 1 - Hero */}
-            <header style={{ padding: "6rem 1.5rem 4rem", textAlign: "center", borderBottom: "1px solid #1e1e32" }}>
+            <header style={{ padding: "5rem 1.5rem 4rem", textAlign: "center", borderBottom: "1px solid #1e1e32" }}>
                 <div style={{ maxWidth: 800, margin: "0 auto" }}>
+                    <div style={{ marginBottom: "1.5rem" }}>
+                        <img src={logoImg} alt="Job Fit Analyzer Logo" style={{ height: "54px", width: "auto", objectFit: "contain" }} />
+                    </div>
                     <div className="mono text-green" style={{ fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: "1rem" }}>
                         $ ./job-fit-analyzer.sh <span className="cursor">_</span>
                     </div>

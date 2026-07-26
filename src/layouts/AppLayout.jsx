@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { logout } from '../services/auth';
+import logoImg from '../assets/logo.png';
 
 export default function AppLayout() {
     const { user, loading } = useAuth();
@@ -54,7 +55,9 @@ export default function AppLayout() {
             `}</style>
             
             <nav className="navbar">
-                <div className="mono" style={{ color: "#00d4ff", fontWeight: 700 }}>job-fit-analyzer</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => navigate('/app')}>
+                    <img src={logoImg} alt="Job Fit Analyzer" style={{ height: "32px", width: "auto", objectFit: "contain" }} />
+                </div>
                 
                 <div className="nav-links mono" style={{ fontSize: "0.8rem" }}>
                     <NavLink to="/app" end style={navLinkStyle}>Nova Análise</NavLink>

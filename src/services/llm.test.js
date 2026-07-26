@@ -1,4 +1,3 @@
-/* global global, process */
 /* eslint-disable no-unused-vars */
 import { analyzeJobFit, testProviderKey, AuthError } from './llm.js';
 import * as firebaseFunctions from 'firebase/functions';
